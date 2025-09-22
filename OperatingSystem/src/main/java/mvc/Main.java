@@ -4,27 +4,20 @@
  */
 package mvc;
 
-/**
- *
- * @author Andrey
- */
 import modelo.MiniPC;
 import vista.View;
+import vista.BCPview;
+import vista.Estadistica;
 import controlador.Controlador;
 
 public class Main {
-    /**
-     * Metodo princial que inicia la aplicacion
-     * Entrada: @param args argumentos por medio de la UI
-     * Salida: lanza la UI
-     * Restricciones: No posee restricciones
-     * Objetivo: inicializar el modelo, vista y controlador para establecer
-     *          comunicion del patron mvc
-     */
+
     public static void main(String[] args) {
-        MiniPC modelo = new MiniPC(100);
+        MiniPC modelo = new MiniPC(512,512);
         View view = new View();
-        Controlador controlador = new Controlador(modelo, view);
+        BCPview bcpview = new BCPview();
+        Estadistica estadistica = new Estadistica();
+        Controlador controlador = new Controlador(modelo, view,bcpview,estadistica);
         view.setVisible(true);
     }
 }

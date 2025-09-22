@@ -5,6 +5,8 @@ import static controlador.Utilidades.seleccionarArchivo;
 import modelo.MiniPC;
 
 import vista.View;
+import vista.BCPview;
+import vista.Estadistica;
 import java.awt.event.*;
 import java.io.File;
 import java.util.List;
@@ -15,33 +17,31 @@ import modelo.CPU;
 public class Controlador {
     private MiniPC pc;
     private View view;
+    private Estadistica estadistica;
+    private BCPview bcpV;
     private int contador =0;
     
-    /**
-     * Constructor del controlador
-     * Entrada: la instancia de la minipc y la vista
-     * Salida: ninguna
-     * Restricciones: no posee restricciones
-     * Objetivo: comunicacion entre la interfaz y la minipc
-     */
-    public Controlador(MiniPC pc, View view) {
+
+    public Controlador(MiniPC pc, View view,BCPview bcpV,Estadistica estadistica ) {
         this.pc = pc;
         this.view = view;
+        this.bcpV = bcpV;
+        this.estadistica = estadistica;
         this.view.btnBuscarListener(e -> buscarArchivo());
         this.view.btnEjecutar(e -> ejecutarPC());
         this.view.btnLimpiar(e -> cleanAll());
         this.view.btnPasoListener(e -> ejecutarPasoPaso());
+        
+        this.view.btnVerBCP(e -> mostrarBCP());
+        this.view.btnVerEst(e -> mostrarEstadistica());
+        this.estadistica.btnVolver(e -> volverEst());
+        this.bcpV.btnVolver(e -> volverBCP());
     }
-    /**
-     * Entrada: no recibe parametros
-     * Salida: ejecuta,cargar e inicializar las instrucciones y actualiza los registro
-     * Restricciones: que hayan instrucciones cargas
-     * Objetivo: ejecucionc completa del programa, actualizando los 
-     *           modelos de programa
-     */
+ 
     public void ejecutarPC(){
-        int size = (Integer) view.getSpnMemoria().getValue();
-        System.out.println("tamano memoria: "+size);
+        int sizeMemoria = (Integer) view.getSpnMemoria().getValue();
+        int sizeDisco = (Integer) view.getSpnDisco().getValue();
+        System.out.println("tamano memoria: "+sizeMemoria+" , "+sizeDisco);
        // pc = new MiniPC(size);
         
         List<String> instr = pc.getIntr();
@@ -49,7 +49,7 @@ public class Controlador {
             JOptionPane.showMessageDialog(null,"Error: No hay intrucciones para leer");
             return;
         }
-        pc = new MiniPC(size);
+        pc = new MiniPC(sizeMemoria,sizeDisco);
 
         //limpio
         view.getModelProgram().setRowCount(0);
@@ -69,8 +69,9 @@ public class Controlador {
   
     }
     public void ejecutarPasoPaso(){
-        int size = (Integer) view.getSpnMemoria().getValue();
-        System.out.println("tamano memoria: "+size);
+        int sizeMemoria = (Integer) view.getSpnMemoria().getValue();
+        int sizeDisco = (Integer) view.getSpnDisco().getValue();
+        System.out.println("tamano memoria: "+sizeMemoria+" , "+sizeDisco);
         List<String> instr = pc.getIntr();
         if(instr.isEmpty()){
             JOptionPane.showMessageDialog(null,"Error: No hay intrucciones para leer");
@@ -84,7 +85,7 @@ public class Controlador {
                 view.getModelProgram().setRowCount(0);
                 view.getModelMemory().setRowCount(0);
                 //guardo tamaño de memoria
-                pc = new MiniPC(size);
+                pc = new MiniPC(sizeMemoria,sizeDisco);
                 pc.guardarInstrucciones(instr);
                 //inicializo
                 pc.inicializarPC();
@@ -104,51 +105,28 @@ public class Controlador {
             JOptionPane.showMessageDialog(null, "Fin de instrucciones: " + e.getMessage());
         }
     }
-    /**
-     * Entrada: una instruccion de ensamblador
-     * Salida: añadir la tabla la instruccion en binario
-     * Restricciones: no posee restriciones
-     * Objetivo: añadir la instruccion de ensamblador en binario para
-     *           simular la ejecucion a nivel maquina en la tabla
-     */
+
     public void updateProgram(String instr){
         view.addFilaPrograma(instr, pc.binario(instr));
         
     }
-        /**
-     * Entrada: una instruccion de ensamblador
-     * Salida: añadir la tabla la instruccion 
-     * Restricciones: no posee restriciones
-     * Objetivo: añadir la instruccion de ensamblador  para
-     *           simular la ejecucion cargada
-     */
+ 
     public void updateMemoria(String instr){ 
         int star = pc.getCPU().getPC();
         view.addFilaMemoria(Integer.toString(star), instr);
         
     }
-    /**
-     * Entrada: los registros de la cpu
-     * Salida: la actulizacion del bcp
-     * Restricciones: no posee restricciones
-     * Objetivo: que el usuario logre visualizar las actulizaciones
-     *          del bcp en tiempo de ejecucion
-     */
+
     public void updateBCP(CPU cpu){
-        view.setlbIBX(Integer.toString(cpu.getBX()));
-        view.setlbIR(pc.binario(cpu.getIR()));
-        view.setlblAC(Integer.toString(cpu.getAC()));
-        view.setlblAX(Integer.toString(cpu.getAX()));
-        view.setlblCX(Integer.toString(cpu.getCX()));
-        view.setlblDX(Integer.toString(cpu.getDX()));
-        view.setlblPC(Integer.toString(cpu.getPC())); 
+        bcpV.setlbIBX(Integer.toString(cpu.getBX()));
+        bcpV.setlbIR(pc.binario(cpu.getIR()));
+        bcpV.setlblAC(Integer.toString(cpu.getAC()));
+        bcpV.setlblAX(Integer.toString(cpu.getAX()));
+        bcpV.setlblCX(Integer.toString(cpu.getCX()));
+        bcpV.setlblDX(Integer.toString(cpu.getDX()));
+        bcpV.setlblPC(Integer.toString(cpu.getPC())); 
     }
-    /**
-     * Entrada: el archivo seleccionado por el usuario
-     * Salida: guardar las instrucciones en la minipc
-     * Restricciones: no posee restricciones
-     * Objetivo: cargar instrucciones del usuario
-     */
+ 
     public void buscarArchivo(){
         File archivo = seleccionarArchivo();
         if(archivo != null){
@@ -163,29 +141,38 @@ public class Controlador {
             }
         }
     }
-    /**
-     * Entrada: no recibe parametros
-     * Salida: limpiar todo el contenido de la minipc
-     * Restricciones: no posee restricciones
-     * Objetivo: cuando el usuario desee volver a correr el programa
-     *           que todo el contenido posterior se elimine
-     */
+
     public void cleanAll(){
         view.getModelProgram().setRowCount(0);
         view.getModelMemory().setRowCount(0);
         pc.getCPU().reset();
         pc.guardarInstrucciones(List.of());
         contador =0;
-        view.setlbIBX("---");
-        view.setlbIR("---");
-        view.setlblAC("---");
-        view.setlblAX("---");
-        view.setlblCX("---");
-        view.setlblDX("---");
-        view.setlblPC("---");
+        bcpV.setlbIBX("---");
+        bcpV.setlbIR("---");
+        bcpV.setlblAC("---");
+        bcpV.setlblAX("---");
+        bcpV.setlblCX("---");
+        bcpV.setlblDX("---");
+        bcpV.setlblPC("---");
         view.getSpnMemoria().setValue(100);
         JOptionPane.showMessageDialog(null, "Sistema limpiado correctamente");
-        
+    }
+    
+    private void mostrarBCP(){
+       // view.dispose(); cierro ventana principal
+        bcpV.setVisible(true);
+    }
+    private void mostrarEstadistica(){
+       // view.dispose(); cierro ventana principal
+        estadistica.setVisible(true);
+    }
+
+    private void volverEst(){
+        estadistica.setVisible(false);
+    }
+    private void volverBCP(){
+        bcpV.setVisible(false);
         
     }
     

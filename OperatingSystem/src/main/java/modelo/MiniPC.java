@@ -13,66 +13,43 @@ import javax.swing.JOptionPane;
  */
 public class MiniPC {
     private CPU cpu;
+    private Disco disco;
     private Memoria memoria;
     private List<String> instrucciones;
+    private Queue<BCP> colaProcesos; //FIFO
+    private int contProcess =1;
+    private int memoriaLibre = 0;
     
-    /**
-     * Constructor
-     * Entrada: el tamaño de la memoria 
-     * Salida: inicializar la minipc
-     * Restricciones: no posee restricciones
-     * Objetivo: crar una minipc con memoria del tamaño especifido
-     */
-    public MiniPC(int tamanno){
+  
+    public MiniPC(int sizeDisco,int sizeMemoria){
         cpu = new CPU();
-       // memoria = new Memoria(100);
-        memoria = new Memoria(tamanno);
+        disco = new Disco(sizeDisco);
+        memoria = new Memoria(sizeMemoria);
         instrucciones = new ArrayList<>();
+        colaProcesos = new LinkedList<>(); 
     }
-    /**
-     * Entrada: no recibe parametros
-     * Salida: asigna la lista cargada
-     * Restricciones no posee restricciones
-     * Objetivo: acceder al conjuto de instrucciones cargadas
-     * 
-     */
+   
     public void guardarInstrucciones(List<String> lista){
         instrucciones = lista;
     }
-    /**
-     * Entrada: no recibe parametros
-     * Salida: retona la lista cargada
-     * Restricciones no posee restricciones
-     * Objetivo: acceder al conjuto de instrucciones cargadas
-     * 
-     */
+
     public List<String> getIntr(){
         System.out.println(instrucciones);
         return instrucciones;
     }   
-     /**
-     * Entrada: no recibe parametros
-     * Salida: indica la posicion donde arranca el pc
-     * Restricciones: el 20 al 100
-     * Objetivo: establecer el pc en una posicion aleatoria
-     */
+
     public void inicializarPC(){
         cpu.reset();
         Random rand = new Random();
         //posicion inical donde empieza a guardase las intrucciones
-        int pos = rand.nextInt(memoria.size()-20+1) + 20;
+        int pos = rand.nextInt(disco.size()-20+1) + 20;
         cpu.setPC(pos);
     }
-     /**
-     * Entrada: una intruccion de ensamblador
-     * Salida: se carga en memoria la instruccion
-     * Restricciones: la posicicon debe ser menor al tamaño de la memoria
-     * Objetivo: cargar una instruccion en memoria para que pueda ser ejecutada
-     */
+
     public void cargarSO(String instr){
         int pos = cpu.getPC();
-        if(pos <= memoria.size()){
-            memoria.setMemoria(pos,instr);
+        if(pos <= disco.size()){
+            disco.setDisco(pos,instr);
             pos++;
         } else{
             JOptionPane.showConfirmDialog(null, "Error al leer el archivo" );
@@ -81,21 +58,16 @@ public class MiniPC {
            
     }
    
-    /**
-     * Entrada: no recibe parametros
-     * Salida: ejectuar instruccion en memoria
-     * Restricciones: el pc debe estar en el rango de memoria
-     * Objetivo: ejecutar la instruccion carga en registro y avanzar el pc
-     */
+
     public void pasoPaso(){
-        System.out.println("tamaño memoria: "+memoria.size());
+        System.out.println("tamaño disco: "+disco.size());
         int pc = cpu.getPC();
-        if(pc >= memoria.size()){
-            JOptionPane.showConfirmDialog(null, "Fin de la memoria" );
+        if(pc >= disco.size()){
+            JOptionPane.showConfirmDialog(null, "Fin de la disco" );
             return;
         }
         //se toma instruccion que se acaba de cargar
-        String instr = memoria.getMemoria(pc);
+        String instr = disco.getDisco(pc);
         if(instr == null){
             JOptionPane.showConfirmDialog(null, "No hay instrucciones en la posicion "+pc );
             return;
@@ -104,13 +76,9 @@ public class MiniPC {
         interprete(instr);
         cpu.setPC(pc+1);
     }
-    /**
-     * Entrada: nombre de un registro y un valor entero
-     * Salida: actualizar el valor del registro
-     * Restricciones: solo tiene los registro ax,bx,cx,dx
-     * Objetivo: funcion auxiliar de interprete que nos ayuda a asignar
-     *          un valor a un registro de la CPU
-     */
+    
+    
+
     public void movRegistro(String registro,int valor){
         switch(registro.replace(",", "").toLowerCase()){
             case "ax":cpu.setAX(valor);break;
@@ -120,13 +88,7 @@ public class MiniPC {
             
         }
     }
-    /**
-     * Entrada: nombre de un registro temporal
-     * Salida: el valor almacenador en el registro
-     * Restricciones: solo tiene los registro ax,bx,cx,dx
-     * Objetivo: funcion auxiliar de interprete que nos ayuda a obtener
-     *          el contenido actual de un registro de la CPU
-     */
+
     public int getRegistro(String registro){
         switch(registro.replace(",", "").toLowerCase()){
             case "ax": return cpu.getAX();
@@ -137,12 +99,7 @@ public class MiniPC {
         }
         return 0;
     }
-    /**
-     * Entrada: una instruccion de ensamblador
-     * Salida: modificacion de los registros y el acumulador
-     * Restricciones: debe de tener las operacion load,store,mov,sub,add
-     * Objetivo: actualiar el estado de los registros de la CPU
-     */
+
     public void interprete(String instr){
         String[] partes = instr.split(" ");
         String op = partes[0].toLowerCase();
@@ -164,13 +121,7 @@ public class MiniPC {
                 break;
         }
     }
-    /**
-     * Entrada: una intruccion(asm) de tipo string  
-     * Salida: la instruccion en binario
-     * Restricciones: solo entiende asm
-     * Objetivo: traducir instruccion en ensamblador en binario para
-     *           simular la ejecucion a nivel maquina
-     */
+
     public String binario (String instr){
         String[] partes = instr.split(" ");
         String op = partes[0].toLowerCase();
@@ -200,9 +151,54 @@ public class MiniPC {
         return str;
         
     }
+    //bcp
+    
+     
+    public void crearProceso(List<String> instrucciones, int prioridad){
+        int algo = 1;
+        //calcular base donde guardar el proceso en el disco
+        int base = algo;
+        int liminte = algo;
+        //crear BCP
+        BCP bcp = new BCP(contProcess++,"nuevo",prioridad,base,liminte);
+        bcp.setEstado("nuevo");
+        bcp.setCpuAsig("cpu0");
+        bcp.setTiempoInicio(System.currentTimeMillis());
+       // BCP bcp = new BCP;
+        colaProcesos.add(bcp);
+        
+    }
+      
+    public void guardarBCPMemoria(BCP bcp, int posicion){
+        memoria.setMemoria(posicion,"p"+bcp.getIdProceso());
+        memoria.setMemoria(posicion + 1,bcp.getEstado());
+        memoria.setMemoria(posicion + 2,Integer.toString(bcp.getPc()));
+        memoria.setMemoria(posicion + 3,Integer.toString(bcp.getBase()));
+        memoria.setMemoria(posicion + 3,Integer.toString(bcp.getAlcance()));
+        memoria.setMemoria(posicion,Integer.toString(bcp.getAc()));
+        memoria.setMemoria(posicion,Integer.toString(bcp.getAx()));
+        memoria.setMemoria(posicion,Integer.toString(bcp.getBx()));
+        memoria.setMemoria(posicion,Integer.toString(bcp.getCx()));
+        memoria.setMemoria(posicion,Integer.toString(bcp.getDx()));
+        memoria.setMemoria(posicion,bcp.getIr());
+        memoria.setMemoria(posicion,Long.toString(bcp.getTiempoInicio()));
+        memoria.setMemoria(posicion,Long.toString(bcp.getTiempoFin()));
+        memoria.setMemoria(posicion,Long.toString(bcp.getTiempoTotal()));
+        //falta pila y archivos
+    }
+    
+
+    private int asignarMemoria(int tamano) {
+        int base = memoriaLibre;
+        memoriaLibre += tamano;
+        return base;
+    }
+      
+    
+    
     
     public CPU getCPU() {return cpu;}
-    public Memoria getMemoria() {return memoria;}
+    public Disco getMemoria() {return disco;}
     
     
 }
