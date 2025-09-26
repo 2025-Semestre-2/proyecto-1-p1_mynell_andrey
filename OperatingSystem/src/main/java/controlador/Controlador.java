@@ -2,10 +2,10 @@ package controlador;
 
 import static controlador.Utilidades.leerArchivo;
 import static controlador.Utilidades.seleccionarArchivo;
-import modelo.MiniPC;
+import modelo.SistemaOperativo;
 
 import vista.View;
-import vista.BCPview;
+
 import vista.Estadistica;
 import java.awt.event.*;
 import java.io.File;
@@ -15,41 +15,39 @@ import javax.swing.table.DefaultTableModel;
 import modelo.CPU;
 
 public class Controlador {
-    private MiniPC pc;
+    private SistemaOperativo pc;
     private View view;
     private Estadistica estadistica;
-    private BCPview bcpV;
     private int contador =0;
     
 
-    public Controlador(MiniPC pc, View view,BCPview bcpV,Estadistica estadistica ) {
+    public Controlador(SistemaOperativo pc, View view,Estadistica estadistica ) {
         this.pc = pc;
         this.view = view;
-        this.bcpV = bcpV;
+  
         this.estadistica = estadistica;
         this.view.btnBuscarListener(e -> buscarArchivo());
         this.view.btnEjecutar(e -> ejecutarPC());
         this.view.btnLimpiar(e -> cleanAll());
         this.view.btnPasoListener(e -> ejecutarPasoPaso());
-        
-        this.view.btnVerBCP(e -> mostrarBCP());
+       
         this.view.btnVerEst(e -> mostrarEstadistica());
         this.estadistica.btnVolver(e -> volverEst());
-        this.bcpV.btnVolver(e -> volverBCP());
+
     }
  
     public void ejecutarPC(){
         int sizeMemoria = (Integer) view.getSpnMemoria().getValue();
         int sizeDisco = (Integer) view.getSpnDisco().getValue();
         System.out.println("tamano memoria: "+sizeMemoria+" , "+sizeDisco);
-       // pc = new MiniPC(size);
+       // pc = new SistemaOperativo(size);
         
         List<String> instr = pc.getIntr();
         if(instr.isEmpty()){
             JOptionPane.showMessageDialog(null,"Error: No hay intrucciones para leer");
             return;
         }
-        pc = new MiniPC(sizeMemoria,sizeDisco);
+        pc = new SistemaOperativo(sizeMemoria,sizeDisco);
 
         //limpio
         view.getModelProgram().setRowCount(0);
@@ -85,7 +83,7 @@ public class Controlador {
                 view.getModelProgram().setRowCount(0);
                 view.getModelMemory().setRowCount(0);
                 //guardo tamaño de memoria
-                pc = new MiniPC(sizeMemoria,sizeDisco);
+                pc = new SistemaOperativo(sizeMemoria,sizeDisco);
                 pc.guardarInstrucciones(instr);
                 //inicializo
                 pc.inicializarPC();
@@ -118,13 +116,13 @@ public class Controlador {
     }
 
     public void updateBCP(CPU cpu){
-        bcpV.setlbIBX(Integer.toString(cpu.getBX()));
-        bcpV.setlbIR(pc.binario(cpu.getIR()));
-        bcpV.setlblAC(Integer.toString(cpu.getAC()));
-        bcpV.setlblAX(Integer.toString(cpu.getAX()));
-        bcpV.setlblCX(Integer.toString(cpu.getCX()));
-        bcpV.setlblDX(Integer.toString(cpu.getDX()));
-        bcpV.setlblPC(Integer.toString(cpu.getPC())); 
+        view.setlbIBX(Integer.toString(cpu.getBX()));
+        view.setlbIR(pc.binario(cpu.getIR()));
+        view.setlblAC(Integer.toString(cpu.getAC()));
+        view.setlblAX(Integer.toString(cpu.getAX()));
+        view.setlblCX(Integer.toString(cpu.getCX()));
+        view.setlblDX(Integer.toString(cpu.getDX()));
+        view.setlblPC(Integer.toString(cpu.getPC())); 
     }
  
     public void buscarArchivo(){
@@ -148,21 +146,18 @@ public class Controlador {
         pc.getCPU().reset();
         pc.guardarInstrucciones(List.of());
         contador =0;
-        bcpV.setlbIBX("---");
-        bcpV.setlbIR("---");
-        bcpV.setlblAC("---");
-        bcpV.setlblAX("---");
-        bcpV.setlblCX("---");
-        bcpV.setlblDX("---");
-        bcpV.setlblPC("---");
+        view.setlbIBX("---");
+        view.setlbIR("---");
+        view.setlblAC("---");
+        view.setlblAX("---");
+        view.setlblCX("---");
+        view.setlblDX("---");
+        view.setlblPC("---");
         view.getSpnMemoria().setValue(100);
         JOptionPane.showMessageDialog(null, "Sistema limpiado correctamente");
     }
     
-    private void mostrarBCP(){
-       // view.dispose(); cierro ventana principal
-        bcpV.setVisible(true);
-    }
+
     private void mostrarEstadistica(){
        // view.dispose(); cierro ventana principal
         estadistica.setVisible(true);
@@ -171,11 +166,6 @@ public class Controlador {
     private void volverEst(){
         estadistica.setVisible(false);
     }
-    private void volverBCP(){
-        bcpV.setVisible(false);
-        
-    }
-    
        
 
 }

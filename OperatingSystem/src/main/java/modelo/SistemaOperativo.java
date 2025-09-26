@@ -4,33 +4,34 @@
  */
 package modelo;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
-
+import java.util.*;
 import javax.swing.JOptionPane;
 
 /**
  *
  * @author Andrey
  */
-public class MiniPC {
+/*
+["arch1:5","arch2:12","arch3:18","arch4:24","arch5:30",
+"mov ax, 5","mov bx, 3","load ax","add bx","sub ax","store ax","mov bx, -8",
+"mov ax, 10","mov bx, 2","sub bx","add ax","store bx","mov cx, 7",
+"mov cx, 4","mov dx, 6","load cx","add dx","store cx","mov ax, 12",
+"mov ax, 1","mov bx, 1","add bx","add ax","store bx","mov dx, 9",
+"mov ax, 15","mov bx, 5","sub bx","load bx","add ax","store ax","mov cx, -3"]
+*/
+public class SistemaOperativo {
     private CPU cpu;
     private Disco disco;
     private Memoria memoria;
-    private int tamanno;
     private List<String> instrucciones;
     private Queue<BCP> colaProcesos; //FIFO
     private int contProcess =1;
     private int memoriaLibre = 0;
     
   
-    public MiniPC(int sizeDisco,int sizeMemoria){
+    public SistemaOperativo(int sizeDisco,int sizeMemoria){
         cpu = new CPU();
-         disco = new Disco(sizeDisco);
-        this.tamanno = tamanno;
+        disco = new Disco(sizeDisco);
         memoria = new Memoria(sizeMemoria);
         instrucciones = new ArrayList<>();
         colaProcesos = new LinkedList<>(); 
@@ -189,22 +190,24 @@ public class MiniPC {
     }
       
     public void guardarBCPMemoria(BCP bcp, int posicion){
-        memoria.setMemoria(posicion,"p"+bcp.getIdProceso());
-        memoria.setMemoria(posicion + 1,bcp.getEstado());
-        memoria.setMemoria(posicion + 2,Integer.toString(bcp.getPc()));
-        memoria.setMemoria(posicion + 3,Integer.toString(bcp.getBase()));
-        memoria.setMemoria(posicion + 3,Integer.toString(bcp.getAlcance()));
-        memoria.setMemoria(posicion,Integer.toString(bcp.getAc()));
-        memoria.setMemoria(posicion,Integer.toString(bcp.getAx()));
-        memoria.setMemoria(posicion,Integer.toString(bcp.getBx()));
-        memoria.setMemoria(posicion,Integer.toString(bcp.getCx()));
-        memoria.setMemoria(posicion,Integer.toString(bcp.getDx()));
-        memoria.setMemoria(posicion,bcp.getIr());
-        memoria.setMemoria(posicion,Long.toString(bcp.getTiempoInicio()));
-        memoria.setMemoria(posicion,Long.toString(bcp.getTiempoFin()));
-        memoria.setMemoria(posicion,Long.toString(bcp.getTiempoTotal()));
-        //falta pila y archivos
+        memoria.setMemoria(posicion++,"p"+bcp.getIdProceso());
+        memoria.setMemoria(posicion++,bcp.getEstado());
+        memoria.setMemoria(posicion++,Integer.toString(bcp.getPc()));
+        memoria.setMemoria(posicion++,Integer.toString(bcp.getBase()));
+        memoria.setMemoria(posicion++,Integer.toString(bcp.getAlcance()));
+        memoria.setMemoria(posicion++,Integer.toString(bcp.getAc()));
+        memoria.setMemoria(posicion++,Integer.toString(bcp.getAx()));
+        memoria.setMemoria(posicion++,Integer.toString(bcp.getBx()));
+        memoria.setMemoria(posicion++,Integer.toString(bcp.getCx()));
+        memoria.setMemoria(posicion++,Integer.toString(bcp.getDx()));
+        memoria.setMemoria(posicion++,bcp.getIr());
+        memoria.setMemoria(posicion++,Long.toString(bcp.getTiempoInicio()));
+        memoria.setMemoria(posicion++,Long.toString(bcp.getTiempoFin()));
+        memoria.setMemoria(posicion++,Long.toString(bcp.getTiempoTotal()));
+        memoria.setMemoria(posicion++, bcp.getPila().toString());
+        memoria.setMemoria(posicion++, String.join(",", bcp.getArchivos()));
     }
+    
     
 
     private int asignarMemoria(int tamano) {
@@ -218,6 +221,6 @@ public class MiniPC {
     
     public CPU getCPU() {return cpu;}
     public Disco getMemoria() {return disco;}
-    public void setTamanno(int tamanno){this.tamanno = tamanno;}
+    
     
 }

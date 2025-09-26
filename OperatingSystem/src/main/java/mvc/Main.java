@@ -4,20 +4,19 @@
  */
 package mvc;
 
-import modelo.MiniPC;
+import modelo.SistemaOperativo;
 import vista.View;
-import vista.BCPview;
 import vista.Estadistica;
 import controlador.Controlador;
 
 public class Main {
 
     public static void main(String[] args) {
-        MiniPC modelo = new MiniPC(512,512);
+        SistemaOperativo modelo = new SistemaOperativo(512,512);
         View view = new View();
-        BCPview bcpview = new BCPview();
+     
         Estadistica estadistica = new Estadistica();
-        Controlador controlador = new Controlador(modelo, view,bcpview,estadistica);
+        Controlador controlador = new Controlador(modelo, view,estadistica);
         view.setVisible(true);
     }
 }
