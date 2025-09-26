@@ -21,7 +21,6 @@ public class MiniPC {
     private Disco disco;
     private Memoria memoria;
     private int tamanno;
-    private int tamanno;
     private List<String> instrucciones;
     private Queue<BCP> colaProcesos; //FIFO
     private int contProcess =1;
@@ -38,11 +37,7 @@ public class MiniPC {
     }
    
     public void guardarInstrucciones(List<String> lista){
-        if (instrucciones.size() + lista.size() <= tamanno) {
-            instrucciones.addAll(lista);
-        } else {
-            System.out.println("No se pueden agregar los elementos, se superaría el máximo de " + tamanno);
-        }
+        instrucciones = lista;
     }
 
     public List<String> getIntr(){
