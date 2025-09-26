@@ -22,6 +22,7 @@ public class Utilidades {
      */
     public static File seleccionarArchivo(){
         JFileChooser fc = new JFileChooser();
+        fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Archivos ASM", "asm"));
         int selecionado = fc.showOpenDialog(null);
         if(selecionado == JFileChooser.APPROVE_OPTION){
             return fc.getSelectedFile();

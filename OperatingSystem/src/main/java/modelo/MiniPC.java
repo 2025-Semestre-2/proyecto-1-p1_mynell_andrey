@@ -4,7 +4,12 @@
  */
 package modelo;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Random;
+
 import javax.swing.JOptionPane;
 
 /**
@@ -15,6 +20,7 @@ public class MiniPC {
     private CPU cpu;
     private Disco disco;
     private Memoria memoria;
+    private int tamanno;
     private List<String> instrucciones;
     private Queue<BCP> colaProcesos; //FIFO
     private int contProcess =1;
@@ -23,7 +29,8 @@ public class MiniPC {
   
     public MiniPC(int sizeDisco,int sizeMemoria){
         cpu = new CPU();
-        disco = new Disco(sizeDisco);
+         disco = new Disco(sizeDisco);
+        this.tamanno = tamanno;
         memoria = new Memoria(sizeMemoria);
         instrucciones = new ArrayList<>();
         colaProcesos = new LinkedList<>(); 
@@ -132,6 +139,18 @@ public class MiniPC {
             case "mov": str = "0011"; break;
             case "sub": str = "0100";break; //0111?
             case "add": str = "0101";break;
+            
+            case "inc": str = "0110"; break;
+            case "dec": str = "0111";break;
+            case "swap": str = "1000";break;
+            case "int": str = "1001";break;
+            case "jmp": str = "1010";break;
+            case "cmp": str = "1011";break;
+            case "je": str = "1100";break;
+            case "jne": str = "1101";break;
+            case "param": str = "1110";break;
+            case "push": str = "1111";break;
+            case "pop": str = "0000";break;
         }
         String reg = partes[1].replace(",", "").toLowerCase();
         switch(reg){
@@ -199,6 +218,6 @@ public class MiniPC {
     
     public CPU getCPU() {return cpu;}
     public Disco getMemoria() {return disco;}
-    
+    public void setTamanno(int tamanno){this.tamanno = tamanno;}
     
 }
