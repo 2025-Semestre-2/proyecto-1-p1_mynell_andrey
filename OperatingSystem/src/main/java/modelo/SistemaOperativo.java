@@ -4,6 +4,7 @@
  */
 package modelo;
 
+import java.io.IOException;
 import java.util.*;
 import javax.swing.JOptionPane;
 
@@ -39,8 +40,8 @@ public class SistemaOperativo {
         this.memoria = new Memoria(sizeMemoria);
 }
 
-    public void tamannoDisco(int sizeDisco) {
-        this.disco = new Disco(sizeDisco);
+    public void tamannoDisco(int sizeDisco) throws IOException {
+        this.disco = new Disco("src/hardware/Disco.txt", sizeDisco);
     }
     public void guardarInstrucciones(List<String> lista){
         instrucciones = lista;
