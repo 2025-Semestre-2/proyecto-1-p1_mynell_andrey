@@ -47,6 +47,18 @@ public class BCP {
         this.tiempoInicio = System.currentTimeMillis();
         this.tiempoTotal = 0;
     }
+    public BCP() {
+        this.estado = "nuevo";
+        this.prioridad = 1;
+        this.base = 0;
+        this.alcance = 0;
+        this.pila = new Stack<>();
+        this.archivos = new ArrayList<>();
+        this.tiempoInicio = System.currentTimeMillis();
+        this.tiempoTotal = 0;
+    }
+    //mas getter y setter
+
     
      public String getCpuAsig() {
         return cpuAsig;

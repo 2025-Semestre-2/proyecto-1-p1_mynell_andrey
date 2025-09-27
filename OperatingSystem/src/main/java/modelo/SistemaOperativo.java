@@ -20,23 +20,28 @@ import javax.swing.JOptionPane;
 "mov ax, 15","mov bx, 5","sub bx","load bx","add ax","store ax","mov cx, -3"]
 */
 public class SistemaOperativo {
+    private BCP bcp;
     private CPU cpu;
     private Disco disco;
     private Memoria memoria;
     private List<String> instrucciones;
     private Queue<BCP> colaProcesos; //FIFO
     private int contProcess =1;
-    private int memoriaLibre = 0;
     
   
-    public SistemaOperativo(int sizeDisco,int sizeMemoria){
+    public SistemaOperativo(){
+        bcp = new BCP();
         cpu = new CPU();
-        disco = new Disco(sizeDisco);
-        memoria = new Memoria(sizeMemoria);
         instrucciones = new ArrayList<>();
         colaProcesos = new LinkedList<>(); 
     }
-   
+    public void tamannoMemoria(int sizeMemoria) {
+        this.memoria = new Memoria(sizeMemoria);
+}
+
+    public void tamannoDisco(int sizeDisco) {
+        this.disco = new Disco(sizeDisco);
+    }
     public void guardarInstrucciones(List<String> lista){
         instrucciones = lista;
     }
@@ -46,12 +51,11 @@ public class SistemaOperativo {
         return instrucciones;
     }   
 
-    public void inicializarPC(){
+    public void inicializarSO(int tamanno){
         cpu.reset();
-        Random rand = new Random();
-        //posicion inical donde empieza a guardase las intrucciones
-        int pos = rand.nextInt(disco.size()-20+1) + 20;
-        cpu.setPC(pos);
+        cpu.setPC(0);
+        int base = getEspacioSO(tamanno);
+        bcp.setPc(base);
     }
 
     public void cargarSO(String instr){
@@ -131,6 +135,7 @@ public class SistemaOperativo {
     }
 
     public String binario (String instr){
+
         String[] partes = instr.split(" ");
         String op = partes[0].toLowerCase();
         String str = "";
@@ -178,17 +183,15 @@ public class SistemaOperativo {
         int algo = 1;
         //calcular base donde guardar el proceso en el disco
         int base = algo;
-        int liminte = algo;
+        int limite = algo;
         //crear BCP
-        BCP bcp = new BCP(contProcess++,"nuevo",prioridad,base,liminte);
+        BCP bcp = new BCP(contProcess++,"nuevo",prioridad,base,limite);
         bcp.setEstado("nuevo");
         bcp.setCpuAsig("cpu0");
         bcp.setTiempoInicio(System.currentTimeMillis());
        // BCP bcp = new BCP;
-        colaProcesos.add(bcp);
-        
-    }
-      
+        colaProcesos.add(bcp);   
+    } 
     public void guardarBCPMemoria(BCP bcp, int posicion){
         memoria.setMemoria(posicion++,"p"+bcp.getIdProceso());
         memoria.setMemoria(posicion++,bcp.getEstado());
@@ -208,15 +211,32 @@ public class SistemaOperativo {
         memoria.setMemoria(posicion++, String.join(",", bcp.getArchivos()));
     }
     
+    public int numProcesos(){
+        List<String> lista = getIntr();
+        int numProceso = 0;
+        for(String i:lista){
+            if(i.toLowerCase().startsWith("arch")){
+                numProceso++;
+            }
+        }
+        return numProceso;   
+    }
+    
+    public int getEspacioSO(int totalMemoria){
+        int espacioSO = Math.max(20, totalMemoria/5);
+        return espacioSO;
+    }
     
 
-    private int asignarMemoria(int tamano) {
-        int base = memoriaLibre;
-        memoriaLibre += tamano;
-        return base;
+    public void configurarMemoria(int totalMemoria, int numprocs){
+        int espacioSO = Math.max(20, totalMemoria/5);
+        int espacioUsuario = totalMemoria - espacioSO;
+        
+        int espacioBCP = 16*numProcesos();
+        if(espacioUsuario<espacioBCP){
+            System.out.println("Error:No hay suficiente espacio para "+numProcesos()+"procesos");
+        }
     }
-      
-    
     
     
     public CPU getCPU() {return cpu;}

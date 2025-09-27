@@ -47,22 +47,25 @@ public class Controlador {
             JOptionPane.showMessageDialog(null,"Error: No hay intrucciones para leer");
             return;
         }
-        pc = new SistemaOperativo(sizeMemoria,sizeDisco);
+        pc.tamannoDisco(sizeDisco);
+        pc.tamannoMemoria(sizeMemoria);
 
-        //limpio
-        view.getModelProgram().setRowCount(0);
-        view.getModelMemory().setRowCount(0);
+
         //inicializo
-        pc.inicializarPC();
+        pc.inicializarSO(sizeMemoria);
         
-        for(String i : instr){
+        for(int i = 0; i < instr.size(); i++){
+            String instruccion = instr.get(i);
+            if(i>=pc.numProcesos()){
+                updateProgram(instruccion);
+                System.out.println("hola"+instruccion);}
             //cargo
-            pc.cargarSO(i);
+            pc.cargarSO(instruccion);
             //ejecuto
             pc.pasoPaso();
-            updateProgram(i);
-            updateMemoria(i);
-            updateBCP(pc.getCPU());
+           // updateProgram(i);
+            updateMemoria(instruccion);
+           // updateBCP(pc.getCPU());
         }
   
     }
@@ -83,10 +86,11 @@ public class Controlador {
                 view.getModelProgram().setRowCount(0);
                 view.getModelMemory().setRowCount(0);
                 //guardo tamaño de memoria
-                pc = new SistemaOperativo(sizeMemoria,sizeDisco);
+                pc.tamannoDisco(sizeDisco);
+                pc.tamannoMemoria(sizeMemoria);
                 pc.guardarInstrucciones(instr);
                 //inicializo
-                pc.inicializarPC();
+                pc.inicializarSO(sizeMemoria);
             }
             
             String i = instr.get(contador);

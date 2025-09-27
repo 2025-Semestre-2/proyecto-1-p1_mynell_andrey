@@ -12,7 +12,7 @@ import controlador.Controlador;
 public class Main {
 
     public static void main(String[] args) {
-        SistemaOperativo modelo = new SistemaOperativo(512,512);
+        SistemaOperativo modelo = new SistemaOperativo();
         View view = new View();
      
         Estadistica estadistica = new Estadistica();
