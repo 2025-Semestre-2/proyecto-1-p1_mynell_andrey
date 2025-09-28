@@ -8,6 +8,7 @@ import java.io.*;
 import java.io.File;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 /**
  *
  * @author Andrey
@@ -15,25 +16,27 @@ import javax.swing.*;
 public class Utilidades {
     //abre un archivo y lo retorna
 
-    public static File seleccionarArchivo(){
+    public static File[] seleccionarArchivos() {
         JFileChooser fc = new JFileChooser();
-        int selecionado = fc.showOpenDialog(null);
-        if(selecionado == JFileChooser.APPROVE_OPTION){
-            return fc.getSelectedFile();
+        fc.setMultiSelectionEnabled(true);
+        fc.setFileFilter(new FileNameExtensionFilter("Archivos ASM (*.asm)", "asm"));
+
+        int seleccionado = fc.showOpenDialog(null);
+        if (seleccionado == JFileChooser.APPROVE_OPTION) {
+            return fc.getSelectedFiles();
         }
         return null;
     }
 
-    public static List<String> leerArchivo(File archivo)throws IOException {
+    public static List<String> leerArchivo(File archivo) throws IOException {
         List<String> lineas = new ArrayList<>();
-        try(BufferedReader br = new BufferedReader (new FileReader(archivo))){
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
             String linea;
-            while((linea = br.readLine())!= null){
+            while ((linea = br.readLine()) != null) {
                 lineas.add(linea.trim());
             }
         }
         return lineas;
     }
-  
-   
+
 }

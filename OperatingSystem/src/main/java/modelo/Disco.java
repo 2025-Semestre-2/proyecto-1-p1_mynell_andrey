@@ -23,7 +23,6 @@ public class Disco {
     private final File discoFile;
     private final int indices= 50;
     private final int TAMANO;
-    private int espacioUsado = 0;
     
     /**
      * Contructor que inicializa el tamaño de la disco
@@ -41,7 +40,7 @@ public class Disco {
         }
     }
     
-    private List<String> leerTodo() throws IOException {
+    public List<String> leerTodo() throws IOException {
         List<String> lineas = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(discoFile))) {
             String l;
@@ -50,6 +49,11 @@ public class Disco {
             }
         }
         return lineas;
+    }
+    
+    public List<String> getDatos() throws IOException{
+        List<String> lista = leerTodo();
+        return lista.subList(50, lista.size());
     }
     
     private void escribirTodo(List<String> lineas) throws IOException {
@@ -81,7 +85,7 @@ public class Disco {
             throw new IOException("Espacio insuficiente en el disco");
         }
         
-        int posicionInicio = Math.max(lineas.size(), indices) + 1;
+        int posicionInicio = Math.max(lineas.size(), indices);
         int longitud = contenido.size();
         while (lineas.size() < indices) lineas.add("");
         lineas.addAll(contenido);
@@ -145,6 +149,14 @@ public class Disco {
             System.getLogger(Disco.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
         return null;
+    }
+    
+    public void ClearAll(){
+        try {
+            escribirTodo(List.of());
+        } catch (IOException ex) {
+            System.getLogger(Disco.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
     }
     
     public int size() {

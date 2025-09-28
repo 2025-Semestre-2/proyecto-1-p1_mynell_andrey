@@ -35,6 +35,11 @@ public class SistemaOperativo {
         cpu = new CPU();
         instrucciones = new ArrayList<>();
         colaProcesos = new LinkedList<>(); 
+        try {
+            this.disco = new Disco("Disco.txt", 512);
+        } catch (IOException ex) {
+            System.getLogger(SistemaOperativo.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
     }
     public void tamannoMemoria(int sizeMemoria) {
         this.memoria = new Memoria(sizeMemoria);
@@ -43,8 +48,30 @@ public class SistemaOperativo {
     public void tamannoDisco(int sizeDisco) throws IOException {
         this.disco = new Disco("src/hardware/Disco.txt", sizeDisco);
     }
-    public void guardarInstrucciones(List<String> lista){
-        instrucciones = lista;
+    public void guardarInstrucciones(String nombreArchivo,List<String> lista){
+        try {
+            disco.crearArchivo(nombreArchivo, lista);
+        } catch (IOException ex) {
+            System.getLogger(SistemaOperativo.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+        try {
+            instrucciones = disco.getDatos();
+        } catch (IOException ex) {
+            System.getLogger(SistemaOperativo.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+    }
+    
+    public void ClearDisk(){
+        disco.ClearAll();
+    }
+    
+    public List<String> getDisk(){
+        try {
+            return disco.leerTodo();
+        } catch (IOException ex) {
+            System.getLogger(SistemaOperativo.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+        return null;
     }
 
     public List<String> getIntr(){

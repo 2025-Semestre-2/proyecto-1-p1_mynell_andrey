@@ -1,7 +1,7 @@
 package controlador;
 
 import static controlador.Utilidades.leerArchivo;
-import static controlador.Utilidades.seleccionarArchivo;
+import static controlador.Utilidades.seleccionarArchivos;
 import modelo.SistemaOperativo;
 
 import vista.View;
@@ -9,6 +9,7 @@ import vista.View;
 import vista.Estadistica;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -33,6 +34,7 @@ public class Controlador {
        
         this.view.btnVerEst(e -> mostrarEstadistica());
         this.estadistica.btnVolver(e -> volverEst());
+        showDisk();
 
     }
  
@@ -47,7 +49,11 @@ public class Controlador {
             JOptionPane.showMessageDialog(null,"Error: No hay intrucciones para leer");
             return;
         }
-        pc.tamannoDisco(sizeDisco);
+        try {
+            pc.tamannoDisco(sizeDisco);
+        } catch (IOException ex) {
+            System.getLogger(Controlador.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
         pc.tamannoMemoria(sizeMemoria);
 
 
@@ -88,7 +94,7 @@ public class Controlador {
                 //guardo tamaño de memoria
                 pc.tamannoDisco(sizeDisco);
                 pc.tamannoMemoria(sizeMemoria);
-                pc.guardarInstrucciones(instr);
+                //pc.guardarInstrucciones(instr);
                 //inicializo
                 pc.inicializarSO(sizeMemoria);
             }
@@ -105,6 +111,8 @@ public class Controlador {
             contador++;
         } catch (IndexOutOfBoundsException e) {
             JOptionPane.showMessageDialog(null, "Fin de instrucciones: " + e.getMessage());
+        } catch (IOException ex) {
+            System.getLogger(Controlador.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
     }
 
@@ -130,17 +138,32 @@ public class Controlador {
     }
  
     public void buscarArchivo(){
-        File archivo = seleccionarArchivo();
-        if(archivo != null){
-            try{
-                List<String> lista = leerArchivo(archivo);
-                pc.guardarInstrucciones(lista);
-                pc.getIntr();
-                JOptionPane.showMessageDialog(null,"Archivo leido correctamente");
-        
-            } catch(Exception e){
-                JOptionPane.showConfirmDialog(null, "Error al leer el archivo" + e.getMessage());
+        File[] archivos = seleccionarArchivos();
+        if(archivos != null){
+            for(File archivo: archivos){
+                try{
+                    List<String> lista = leerArchivo(archivo);
+                    pc.guardarInstrucciones(archivo.getName(),lista);
+                    pc.getIntr();
+                    JOptionPane.showMessageDialog(null,"Archivo leido correctamente");
+
+                } catch(Exception e){
+                    JOptionPane.showConfirmDialog(null, "Error al leer el archivo" + e.getMessage());
+                }
             }
+        }
+        showDisk();
+    }
+    
+    private void showDisk(){
+        List<String> disco= pc.getDisk();
+        DefaultTableModel modelo = (DefaultTableModel) this.view.jTable3.getModel();
+        modelo.setRowCount(0);
+        for(int i = 0;i<disco.size();i++){
+            modelo.addRow(new Object[]{i, disco.get(i)});
+        }
+        for(int i = disco.size(); i<pc.getMemoria().size(); i++){
+            modelo.addRow(new Object[]{i, ""});
         }
     }
 
@@ -148,7 +171,7 @@ public class Controlador {
         view.getModelProgram().setRowCount(0);
         view.getModelMemory().setRowCount(0);
         pc.getCPU().reset();
-        pc.guardarInstrucciones(List.of());
+        pc.ClearDisk();
         contador =0;
         view.setlbIBX("---");
         view.setlbIR("---");
