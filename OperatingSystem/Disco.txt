@@ -1,4 +1,9 @@
-Prueba.asm|50|7
+test.asm|50|6
+test2.asm|56|7
+test3.asm|63|6
+test4.asm|69|6
+test5.asm|75|7
+test6.asm|82|6
 
 
 
@@ -43,15 +48,41 @@ Prueba.asm|50|7
 
 
 
-
-
-
-
-
-MOV AX, 5
-MOV BX, 3
-LOAD AX
-ADD BX
-SUB AX
-STORE AX
-MOV BX, -8
+mov cx, 4
+mov dx, 6
+load cx
+add dx
+store cx
+mov ax, 12
+mov ax, 5
+mov bx, 3
+load ax
+add bx
+sub ax
+store ax
+mov bx, -8
+mov ax, 10
+mov bx, 2
+sub bx
+add ax
+store bx
+mov cx, 7
+mov ax, 1
+mov bx, 1
+add bx
+add ax
+store bx
+mov dx, 9
+mov ax, 15
+mov bx, 5
+sub bx
+load bx
+add ax
+store ax
+mov cx, -3
+mov ax, 10
+mov bx, 2
+sub bx
+add ax
+store bx
+mov cx, 7

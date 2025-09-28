@@ -14,6 +14,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import modelo.CPU;
+import modelo.BCP;
 
 public class Controlador {
     private SistemaOperativo pc;
@@ -28,7 +29,7 @@ public class Controlador {
   
         this.estadistica = estadistica;
         this.view.btnBuscarListener(e -> buscarArchivo());
-        this.view.btnEjecutar(e -> ejecutarPC());
+        this.view.btnEjecutar(e -> ejecutarSO());
         this.view.btnLimpiar(e -> cleanAll());
         this.view.btnPasoListener(e -> ejecutarPasoPaso());
        
@@ -37,41 +38,99 @@ public class Controlador {
         showDisk();
 
     }
- 
-    public void ejecutarPC(){
+    public void ejecutarSO(){
         int sizeMemoria = (Integer) view.getSpnMemoria().getValue();
         int sizeDisco = (Integer) view.getSpnDisco().getValue();
-        System.out.println("tamano memoria: "+sizeMemoria+" , "+sizeDisco);
-       // pc = new SistemaOperativo(size);
+        try {
+        pc.tamannoDisco(sizeDisco);
+        pc.tamannoMemoria(sizeMemoria);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Error al inicializar el disco: " + e.getMessage());
+            return;
+        }
+        
+        //inicializo
+        pc.inicializarSO(sizeMemoria);
+        
+        //guardarEnDisco();
+        pc.crearProcesos();
+        System.out.println("----");
+        System.out.println(pc.getPlanificador().getColaListos());
+        guardarEspacioSO(sizeMemoria);
+        planificadorTrabajos();
+        
+    }
+ 
+    public void guardarEspacioSO(int size){
+        for(int i =0;i<pc.getEspacioSO(size);i++){
+            view.addFilaMemoria(Integer.toString(i), "<so>");
+        }
+    }
+        
+    public void planificadorTrabajos(){
+        int indice = pc.getBCP().getPc();
+        while(pc.getPlanificador().sizeCola()>0){
+            
+            
+            // tomar el proceso de la cola
+            BCP proceso = pc.getPlanificador().obeterSiguienteProceso();
+            // pasar a preparado
+            proceso.setEstado("preparado");
+            pc.guardarBCPMemoria(proceso,indice);
+            addMemoria(proceso,indice);
+            updateEstados(Integer.toString(proceso.getIdProceso()),proceso.getEstado());
+            // pasar a ejecucion
+            proceso.setEstado("ejecucion");
+            proceso.setTiempoInicio(System.currentTimeMillis());
+            pc.guardarBCPMemoria(proceso,indice);
+            updateMemoria(proceso,indice);
+            updateEstados(Integer.toString(proceso.getIdProceso()),proceso.getEstado());
+            //ejecutar instruciones
+            for(int i = proceso.getBase();i<proceso.getBase()+proceso.getAlcance();i++){
+                String instr = pc.getDisco().getDisco(i);
+                if(instr!=null){
+                    pc.getCPU().setIR(instr);
+                    pc.interprete(instr);
+                    proceso.setPc(i+1);
+                    pc.actualizarBCPDesdeCPU(proceso);
+                    pc.guardarBCPMemoria(proceso,indice);
+                    updateMemoria(proceso,indice);
+                }
+            }
+            
+            proceso.setEstado("finalizado");
+            proceso.setTiempoFin(System.currentTimeMillis());
+            proceso.setTiempoTotal(proceso.getTiempoFin() - proceso.getTiempoInicio());
+            pc.guardarBCPMemoria(proceso,indice);
+            updateMemoria(proceso,indice);
+            updateEstados(Integer.toString(proceso.getIdProceso()),proceso.getEstado());
+            indice+=16;
+        }
+     
+    }
+    
+    public void guardarEnDisco(){
         
         List<String> instr = pc.getIntr();
         if(instr.isEmpty()){
             JOptionPane.showMessageDialog(null,"Error: No hay intrucciones para leer");
             return;
         }
-        try {
-            pc.tamannoDisco(sizeDisco);
-        } catch (IOException ex) {
-            System.getLogger(Controlador.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-        }
-        pc.tamannoMemoria(sizeMemoria);
 
-
-        //inicializo
-        pc.inicializarSO(sizeMemoria);
-        
         for(int i = 0; i < instr.size(); i++){
             String instruccion = instr.get(i);
+            
             if(i>=pc.numProcesos()){
-                updateProgram(instruccion);
+                //updateProgram(instruccion);
                 System.out.println("hola"+instruccion);}
             //cargo
             pc.cargarSO(instruccion);
             //ejecuto
             pc.pasoPaso();
            // updateProgram(i);
-            updateMemoria(instruccion);
+            //updateDisco(instruccion);
            // updateBCP(pc.getCPU());
+           
         }
   
     }
@@ -105,7 +164,7 @@ public class Controlador {
             pc.cargarSO(i);
             //ejecuto
             pc.pasoPaso();
-            updateProgram(i);
+            //updateProgram(i);
             updateMemoria(i);
             updateBCP(pc.getCPU());
             contador++;
@@ -116,8 +175,8 @@ public class Controlador {
         }
     }
 
-    public void updateProgram(String instr){
-        view.addFilaPrograma(instr, pc.binario(instr));
+    public void updateEstados(String valor1,String valor2){
+        view.addFilaEstados(valor1, valor2);
         
     }
  
@@ -126,6 +185,43 @@ public class Controlador {
         view.addFilaMemoria(Integer.toString(star), instr);
         
     }
+    public void addMemoria(BCP bcp, int posicion){
+        view.addFilaMemoria(Integer.toString(posicion++),"p"+bcp.getIdProceso());
+        view.addFilaMemoria(Integer.toString(posicion++),bcp.getEstado());
+        view.addFilaMemoria(Integer.toString(posicion++),Integer.toString(bcp.getPc()));
+        view.addFilaMemoria(Integer.toString(posicion++),Integer.toString(bcp.getBase()));
+        view.addFilaMemoria(Integer.toString(posicion++),Integer.toString(bcp.getAlcance()));
+        view.addFilaMemoria(Integer.toString(posicion++),Integer.toString(bcp.getAc()));
+        view.addFilaMemoria(Integer.toString(posicion++),Integer.toString(bcp.getAx()));
+        view.addFilaMemoria(Integer.toString(posicion++),Integer.toString(bcp.getBx()));
+        view.addFilaMemoria(Integer.toString(posicion++),Integer.toString(bcp.getCx()));
+        view.addFilaMemoria(Integer.toString(posicion++),Integer.toString(bcp.getDx()));
+        view.addFilaMemoria(Integer.toString(posicion++),bcp.getIr());
+        view.addFilaMemoria(Integer.toString(posicion++),Long.toString(bcp.getTiempoInicio()));
+        view.addFilaMemoria(Integer.toString(posicion++),Long.toString(bcp.getTiempoFin()));
+        view.addFilaMemoria(Integer.toString(posicion++),Long.toString(bcp.getTiempoTotal()));
+        view.addFilaMemoria(Integer.toString(posicion++), bcp.getPila().toString());
+        view.addFilaMemoria(Integer.toString(posicion++), String.join(",", bcp.getArchivos()));
+    }
+    public void updateMemoria(BCP bcp, int posicion){
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),"p"+bcp.getIdProceso());
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),bcp.getEstado());
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),Integer.toString(bcp.getPc()));
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),Integer.toString(bcp.getBase()));
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),Integer.toString(bcp.getAlcance()));
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),Integer.toString(bcp.getAc()));
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),Integer.toString(bcp.getAx()));
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),Integer.toString(bcp.getBx()));
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),Integer.toString(bcp.getCx()));
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),Integer.toString(bcp.getDx()));
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),bcp.getIr());
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),Long.toString(bcp.getTiempoInicio()));
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),Long.toString(bcp.getTiempoFin()));
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),Long.toString(bcp.getTiempoTotal()));
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++), bcp.getPila().toString());
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++), String.join(",", bcp.getArchivos()));
+    }
+
 
     public void updateBCP(CPU cpu){
         view.setlbIBX(Integer.toString(cpu.getBX()));
@@ -162,7 +258,7 @@ public class Controlador {
         for(int i = 0;i<disco.size();i++){
             modelo.addRow(new Object[]{i, disco.get(i)});
         }
-        for(int i = disco.size(); i<pc.getMemoria().size(); i++){
+        for(int i = disco.size(); i<pc.getDisco().size(); i++){
             modelo.addRow(new Object[]{i, ""});
         }
     }

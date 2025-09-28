@@ -7,6 +7,7 @@ modelo\CPU.class
 mvc\Main.class
 vista\Estadistica$1.class
 modelo\Memoria.class
+modelo\Planificador.class
 vista\Estadistica.class
 modelo\SistemaOperativo.class
 controlador\Controlador.class

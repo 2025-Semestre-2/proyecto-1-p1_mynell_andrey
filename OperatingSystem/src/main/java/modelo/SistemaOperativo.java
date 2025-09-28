@@ -4,6 +4,7 @@
  */
 package modelo;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import javax.swing.JOptionPane;
@@ -25,9 +26,10 @@ public class SistemaOperativo {
     private CPU cpu;
     private Disco disco;
     private Memoria memoria;
+    private Planificador plan;
     private List<String> instrucciones;
     private Queue<BCP> colaProcesos; //FIFO
-    private int contProcess =1;
+   
     
   
     public SistemaOperativo(){
@@ -35,6 +37,7 @@ public class SistemaOperativo {
         cpu = new CPU();
         instrucciones = new ArrayList<>();
         colaProcesos = new LinkedList<>(); 
+        plan = new Planificador();
         try {
             this.disco = new Disco("Disco.txt", 512);
         } catch (IOException ex) {
@@ -46,7 +49,9 @@ public class SistemaOperativo {
 }
 
     public void tamannoDisco(int sizeDisco) throws IOException {
-        this.disco = new Disco("src/hardware/Disco.txt", sizeDisco);
+        String basePath = System.getProperty("user.dir");
+        String ruta = basePath + File.separator + "Disco.txt";
+        this.disco = new Disco(ruta, sizeDisco);
     }
     public void guardarInstrucciones(String nombreArchivo,List<String> lista){
         try {
@@ -93,9 +98,7 @@ public class SistemaOperativo {
             pos++;
         } else{
             JOptionPane.showConfirmDialog(null, "Error al leer el archivo" );
-         
-        }
-           
+        }   
     }
    
 
@@ -205,21 +208,37 @@ public class SistemaOperativo {
         
     }
     //bcp
+    public void actualizarBCPDesdeCPU(BCP bcp) {
+        bcp.setAc(cpu.getAC());
+        bcp.setAx(cpu.getAX());
+        bcp.setBx(cpu.getBX());
+        bcp.setCx(cpu.getCX());
+        bcp.setDx(cpu.getDX());
+        bcp.setIr(cpu.getIR());
+        bcp.setPc(cpu.getPC());
+    }
     
-     
-    public void crearProceso(List<String> instrucciones, int prioridad){
-        int algo = 1;
-        //calcular base donde guardar el proceso en el disco
-        int base = algo;
-        int limite = algo;
-        //crear BCP
-        BCP bcp = new BCP(contProcess++,"nuevo",prioridad,base,limite);
-        bcp.setEstado("nuevo");
-        bcp.setCpuAsig("cpu0");
-        bcp.setTiempoInicio(System.currentTimeMillis());
-       // BCP bcp = new BCP;
-        colaProcesos.add(bcp);   
-    } 
+
+    public void crearProcesos(){
+        int contProceso=0;
+        for(int i=0;i<getIntr().size();i++){
+            String instru = disco.getDisco(i);
+            if(instru.contains("|")){
+                String[] partes = instru.split("\\|");
+                String nombreArchivo = partes[0];
+                
+                int base = Integer.parseInt(partes[1]);
+                int alcance = Integer.parseInt(partes[2]);
+                String estado ;
+                if(i<5){estado="nuevo";}
+                else {estado = "espera";}
+                BCP bcp = new BCP(contProceso++,estado,i+1,base,alcance);
+                bcp.getArchivos().add(nombreArchivo);
+                plan.agregarProceso(bcp);
+                
+            }
+        } 
+    }
     public void guardarBCPMemoria(BCP bcp, int posicion){
         memoria.setMemoria(posicion++,"p"+bcp.getIdProceso());
         memoria.setMemoria(posicion++,bcp.getEstado());
@@ -243,7 +262,7 @@ public class SistemaOperativo {
         List<String> lista = getIntr();
         int numProceso = 0;
         for(String i:lista){
-            if(i.toLowerCase().startsWith("arch")){
+            if(i.contains("|")){
                 numProceso++;
             }
         }
@@ -268,7 +287,9 @@ public class SistemaOperativo {
     
     
     public CPU getCPU() {return cpu;}
-    public Disco getMemoria() {return disco;}
+    public Disco getDisco() {return disco;}
+    public Planificador getPlanificador() {return plan;}
+    public BCP getBCP() {return bcp;}
     
     
 }

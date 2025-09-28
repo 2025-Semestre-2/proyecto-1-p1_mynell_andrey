@@ -456,8 +456,7 @@ public class View extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
-                            .addComponent(lblDX))
-                        .addContainerGap())
+                            .addComponent(lblDX)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(lbCPU)
@@ -477,8 +476,8 @@ public class View extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lbPrioridad)
-                            .addComponent(jLabel25))
-                        .addContainerGap())))
+                            .addComponent(jLabel25))))
+                .addContainerGap())
         );
 
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
@@ -799,13 +798,18 @@ public class View extends javax.swing.JFrame {
         return (DefaultTableModel) jTable2.getModel();
     }
   
-    public void addFilaPrograma(String colum1, String colum2){
+    public void addFilaEstados(String colum1, String colum2){
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
         model.addRow(new Object[]{colum1,colum2});
     }
     public void addFilaMemoria(String colum1, String colum2){
         DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
         model.addRow(new Object[]{colum1,colum2});
+    }
+    public void updateFilaMemoria(int fila,String colum1, String colum2){
+        DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+        model.setValueAt(colum1,fila,0);
+        model.setValueAt(colum2,fila,1);
     }
    
    
