@@ -590,7 +590,7 @@ public class View extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Instrucción", "Binario"
+                "Proceso", "Estado"
             }
         ));
         jScrollPane1.setViewportView(jTable1);
@@ -598,7 +598,7 @@ public class View extends javax.swing.JFrame {
         jLabel11.setFont(new java.awt.Font("Arial Black", 1, 24)); // NOI18N
         jLabel11.setForeground(new java.awt.Color(0, 153, 51));
         jLabel11.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel11.setText("PROGRAMA");
+        jLabel11.setText("ESTADOS");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -630,7 +630,7 @@ public class View extends javax.swing.JFrame {
         jLabel17.setFont(new java.awt.Font("Arial Black", 1, 24)); // NOI18N
         jLabel17.setForeground(new java.awt.Color(0, 153, 51));
         jLabel17.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel17.setText("ESTADO");
+        jLabel17.setText("ARCHIVOS");
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);

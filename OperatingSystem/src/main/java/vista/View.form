@@ -1141,8 +1141,8 @@
                 </Property>
                 <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
                   <Table columnCount="2" rowCount="0">
-                    <Column editable="true" title="Instrucci&#xf3;n" type="java.lang.Object"/>
-                    <Column editable="true" title="Binario" type="java.lang.Object"/>
+                    <Column editable="true" title="Proceso" type="java.lang.Object"/>
+                    <Column editable="true" title="Estado" type="java.lang.Object"/>
                   </Table>
                 </Property>
                 <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
@@ -1175,7 +1175,7 @@
               <Color blue="33" green="99" red="0" type="rgb"/>
             </Property>
             <Property name="horizontalAlignment" type="int" value="0"/>
-            <Property name="text" type="java.lang.String" value="PROGRAMA"/>
+            <Property name="text" type="java.lang.String" value="ESTADOS"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -1236,7 +1236,7 @@
               <Color blue="33" green="99" red="0" type="rgb"/>
             </Property>
             <Property name="horizontalAlignment" type="int" value="0"/>
-            <Property name="text" type="java.lang.String" value="ESTADO"/>
+            <Property name="text" type="java.lang.String" value="ARCHIVOS"/>
           </Properties>
         </Component>
       </SubComponents>
