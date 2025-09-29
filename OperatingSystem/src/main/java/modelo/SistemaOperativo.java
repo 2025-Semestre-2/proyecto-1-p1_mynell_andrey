@@ -162,6 +162,8 @@ public class SistemaOperativo {
             case "add":
                 cpu.setAC(cpu.getAC()+getRegistro(partes[1]));
                 break;
+            case "inc":
+                break;
         }
     }
     public int getValue(String val){
@@ -264,20 +266,30 @@ public class SistemaOperativo {
             case "push": str = "1111";break;
             case "pop": str = "0000";break;
         }
-        String reg = partes[1].replace(",", "").toLowerCase();
-        switch(reg){
-            case "ax": str += " 0001"; break;
-            case "bx": str += " 0010";  break; 
-            case "cx": str += " 0011"; break;
-            case "dx": str += " 0100";break; 
-            }
-        if(instr.contains(",")){
-            
-            int val = Integer.parseInt(partes[2]);
+        if ("int".equals(op)){
+            int val = Integer.parseInt(partes[1].toLowerCase().replace("h", ""));
             String valBin = String.format("%08d", Integer.parseInt(Integer.toBinaryString(val & 0xFF)));
             str += " " + valBin;
         }else{
-            str += " 00000000";
+            String reg = partes[1].replace(",", "").toLowerCase();
+            switch(reg){
+                case "ax": str += " 0001"; break;
+                case "bx": str += " 0010"; break; 
+                case "cx": str += " 0011"; break;
+                case "dx": str += " 0100";break; 
+                }
+            if(instr.contains(",")){
+                switch(partes[2].toLowerCase()){
+                    case "ax": str += " 0001"; break;
+                    case "bx": str += " 0010";  break; 
+                    case "cx": str += " 0011"; break;
+                    case "dx": str += " 0100";break;
+                    default:
+                        int val = Integer.parseInt(partes[2]);
+                        String valBin = String.format("%08d", Integer.parseInt(Integer.toBinaryString(val & 0xFF)));
+                        str += " " + valBin;
+                }
+            }
         }
         return str;
         
