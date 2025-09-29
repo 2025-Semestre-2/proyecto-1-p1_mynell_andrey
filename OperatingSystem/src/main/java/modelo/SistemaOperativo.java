@@ -221,6 +221,7 @@ public class SistemaOperativo {
 
     public void crearProcesos(){
         int contProceso=0;
+        List<String> archAcc = new ArrayList<>();
         for(int i=0;i<getIntr().size();i++){
             String instru = disco.getDisco(i);
             if(instru.contains("|")){
@@ -232,8 +233,9 @@ public class SistemaOperativo {
                 String estado ;
                 if(i<5){estado="nuevo";}
                 else {estado = "espera";}
+                archAcc.add(nombreArchivo);
                 BCP bcp = new BCP(contProceso++,estado,i+1,base,alcance);
-                bcp.getArchivos().add(nombreArchivo);
+                bcp.getArchivos().addAll(archAcc);
                 plan.agregarProceso(bcp);
                 
             }

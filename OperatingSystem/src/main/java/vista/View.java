@@ -778,17 +778,38 @@ public class View extends javax.swing.JFrame {
 
     
     public void setlbIBX (String mensaje){
+        lbIBX.setText(mensaje);
     }
     public void setlbIR (String mensaje){
+        lbIR.setText(mensaje);
     }
     public void setlblAC (String mensaje){
+        lblAC.setText(mensaje);
     }public void setlblAX (String mensaje){
+        lblAX.setText(mensaje);
     }
     public void setlblCX (String mensaje){
+        lblCX.setText(mensaje);
     }
     public void setlblDX(String mensaje){
+        lblDX.setText(mensaje);
     }
     public void setlblPC (String mensaje){
+        lblPC.setText(mensaje);
+    }
+    public void setlbEnlace (String mensaje){
+        lbEnlace.setText(mensaje);
+    }public void setlbCPU (String mensaje){
+        lbCPU.setText(mensaje);
+    }
+    public void setlbBase (String mensaje){
+        lbBase.setText(mensaje);
+    }
+    public void setlbAlcance(String mensaje){
+        lbAlcance.setText(mensaje);
+    }
+    public void setlblPrioridad (String mensaje){
+        lbPrioridad.setText(mensaje);
     }
 
     public DefaultTableModel getModelProgram(){
@@ -797,7 +818,17 @@ public class View extends javax.swing.JFrame {
     public DefaultTableModel getModelMemory(){
         return (DefaultTableModel) jTable2.getModel();
     }
-  
+    
+    public void addFilaES(int fila,String colum1){
+        DefaultTableModel model = (DefaultTableModel) jTable6.getModel();
+        if(model.getRowCount()<=fila){
+            model.addRow(new Object[]{colum1});
+        }
+        else{
+            model.setValueAt(colum1, fila, 0);
+        }
+        
+    }
     public void addFilaEstados(String colum1, String colum2){
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
         model.addRow(new Object[]{colum1,colum2});

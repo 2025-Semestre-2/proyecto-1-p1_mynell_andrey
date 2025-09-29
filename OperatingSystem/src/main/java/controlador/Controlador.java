@@ -76,15 +76,11 @@ public class Controlador {
             BCP proceso = pc.getPlanificador().obeterSiguienteProceso();
             // pasar a preparado
             proceso.setEstado("preparado");
-            pc.guardarBCPMemoria(proceso,indice);
-            addMemoria(proceso,indice);
-            updateEstados(Integer.toString(proceso.getIdProceso()),proceso.getEstado());
+            preparadoBCP(proceso,indice);
             // pasar a ejecucion
             proceso.setEstado("ejecucion");
             proceso.setTiempoInicio(System.currentTimeMillis());
-            pc.guardarBCPMemoria(proceso,indice);
-            updateMemoria(proceso,indice);
-            updateEstados(Integer.toString(proceso.getIdProceso()),proceso.getEstado());
+            updateBCP(proceso,indice);
             //ejecutar instruciones
             for(int i = proceso.getBase();i<proceso.getBase()+proceso.getAlcance();i++){
                 String instr = pc.getDisco().getDisco(i);
@@ -95,19 +91,39 @@ public class Controlador {
                     pc.actualizarBCPDesdeCPU(proceso);
                     pc.guardarBCPMemoria(proceso,indice);
                     updateMemoria(proceso,indice);
+                    actualizarBCP(proceso);
                 }
             }
             
             proceso.setEstado("finalizado");
             proceso.setTiempoFin(System.currentTimeMillis());
             proceso.setTiempoTotal(proceso.getTiempoFin() - proceso.getTiempoInicio());
-            pc.guardarBCPMemoria(proceso,indice);
-            updateMemoria(proceso,indice);
-            updateEstados(Integer.toString(proceso.getIdProceso()),proceso.getEstado());
+            updateBCP(proceso,indice);
+            agregarEstadosTabla(proceso.getArchivos());
             indice+=16;
         }
      
     }
+    public void updateBCP(BCP proceso,int indice){
+        pc.guardarBCPMemoria(proceso,indice);
+        updateMemoria(proceso,indice);
+        updateEstados(Integer.toString(proceso.getIdProceso()),proceso.getEstado());
+            
+    }
+    public void preparadoBCP(BCP proceso,int indice){
+        pc.guardarBCPMemoria(proceso,indice);
+        addMemoria(proceso,indice);
+        updateEstados(Integer.toString(proceso.getIdProceso()),proceso.getEstado());
+            
+    }
+    public void agregarEstadosTabla(List<String> archivos){
+        int i=0;
+        for(String arch:archivos){
+            view.addFilaES(i,arch);
+            i++;
+        }
+    }
+    
     
     public void guardarEnDisco(){
         
@@ -166,7 +182,7 @@ public class Controlador {
             pc.pasoPaso();
             //updateProgram(i);
             updateMemoria(i);
-            updateBCP(pc.getCPU());
+            //updateBCP(pc.getCPU());
             contador++;
         } catch (IndexOutOfBoundsException e) {
             JOptionPane.showMessageDialog(null, "Fin de instrucciones: " + e.getMessage());
@@ -223,14 +239,20 @@ public class Controlador {
     }
 
 
-    public void updateBCP(CPU cpu){
-        view.setlbIBX(Integer.toString(cpu.getBX()));
-        view.setlbIR(pc.binario(cpu.getIR()));
-        view.setlblAC(Integer.toString(cpu.getAC()));
-        view.setlblAX(Integer.toString(cpu.getAX()));
-        view.setlblCX(Integer.toString(cpu.getCX()));
-        view.setlblDX(Integer.toString(cpu.getDX()));
-        view.setlblPC(Integer.toString(cpu.getPC())); 
+    public void actualizarBCP(BCP bcp){
+        view.setlbIBX(Integer.toString(bcp.getBx()));
+        view.setlbIR(pc.binario(bcp.getIr()));
+        view.setlblAC(Integer.toString(bcp.getAc()));
+        view.setlblAX(Integer.toString(bcp.getAx()));
+        view.setlblCX(Integer.toString(bcp.getCx()));
+        view.setlblDX(Integer.toString(bcp.getDx()));
+        view.setlblPC(Integer.toString(bcp.getPc())); 
+        
+       // view.setlbEnlace(bcp.getSiguiente());
+        view.setlbCPU(bcp.getCpuAsig());
+        view.setlbBase(Integer.toString(bcp.getBase()));
+        view.setlbAlcance(Integer.toString(bcp.getAlcance()));
+        view.setlblPrioridad(Integer.toString(bcp.getPrioridad()));
     }
  
     public void buscarArchivo(){
@@ -277,7 +299,9 @@ public class Controlador {
         view.setlblDX("---");
         view.setlblPC("---");
         view.getSpnMemoria().setValue(100);
+        showDisk();
         JOptionPane.showMessageDialog(null, "Sistema limpiado correctamente");
+        
     }
     
 

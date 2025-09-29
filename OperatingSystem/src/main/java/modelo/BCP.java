@@ -210,6 +210,17 @@ public class BCP {
     public void setTiempoTotal(long tiempoTotal) {
         this.tiempoTotal = tiempoTotal;
     }
-    
+    @Override
+    public String toString() {
+        return "BCP{" +
+                "idProceso=" + idProceso +
+                ", estado='" + estado + '\'' +
+                ", prioridad=" + prioridad +
+                ", base=" + base +
+                ", alcance=" + alcance +
+                ", archivos=" + archivos +
+                '}';
+    }
+
     
 }
