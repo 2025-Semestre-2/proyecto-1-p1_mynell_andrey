@@ -13,4 +13,6 @@ modelo\SistemaOperativo.class
 controlador\Controlador.class
 vista\View$4.class
 modelo\BCP.class
+modelo\Estadisticas.class
 modelo\Disco.class
+modelo\Estadisticas$Registro.class
