@@ -164,6 +164,81 @@ public class SistemaOperativo {
                 break;
         }
     }
+    public int getValue(String val){
+        int time =0;
+        switch(val){
+            case "20h":
+                time= 3000;
+                break;
+            case "10h":
+                time= 2000;
+                break;
+            case "9h":
+                time= 3000;
+                break;
+            case "21h":
+                time= 5000;
+                break;
+        }
+        return time;
+    }
+    public int getTimer(String instr){
+        String[] partes = instr.split(" ");
+        String op = partes[0].toLowerCase();
+        String val = partes[1].toLowerCase();
+        int time =0;
+        switch(op){
+            case "load":
+                time= 1000;
+                break;
+            case "store":
+                time= 1000;
+                break;
+            case "mov":
+                time= 1000;
+                break;
+            case "sub":
+                time= 1000;
+                break;
+            case "add":
+                time= 1000;
+                break;
+            case "inc":
+                time= 1000;
+                break;
+            case "dec":
+                time= 1000;
+                break;    
+            case "swap":
+                time= 2000;
+                break;  
+            case "int":
+                time= getValue(val);
+                break;
+            case "jmp":
+                time = 2000;
+                break;
+            case "cmp":
+                time = 1000;
+                break;
+            case "jne":
+                time = 2000;
+                break;
+            case "je":
+                time = 2000;
+                break;
+            case "param":
+                time = 3000;
+                break;
+            case "push":
+                time = 1000;
+                break;
+            case "pop":
+                time = 1000;
+                break;
+        }
+        return time;
+    }
 
     public String binario (String instr){
 

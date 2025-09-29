@@ -67,43 +67,61 @@ public class Controlador {
         }
     }
         
-    public void planificadorTrabajos(){
+    public void planificadorTrabajos() {
+    new Thread(() -> {   
         int indice = pc.getBCP().getPc();
-        while(pc.getPlanificador().sizeCola()>0){
-            
-            
+        while (pc.getPlanificador().sizeCola() > 0) {
+
             // tomar el proceso de la cola
             BCP proceso = pc.getPlanificador().obeterSiguienteProceso();
+
             // pasar a preparado
             proceso.setEstado("preparado");
-            preparadoBCP(proceso,indice);
+            int finalIndice = indice;
+            preparadoBCP(proceso, finalIndice);
+
             // pasar a ejecucion
             proceso.setEstado("ejecucion");
             proceso.setTiempoInicio(System.currentTimeMillis());
-            updateBCP(proceso,indice);
-            //ejecutar instruciones
-            for(int i = proceso.getBase();i<proceso.getBase()+proceso.getAlcance();i++){
+            updateBCP(proceso, finalIndice);
+
+            // ejecutar instrucciones
+            for (int i = proceso.getBase(); i < proceso.getBase() + proceso.getAlcance(); i++) {
                 String instr = pc.getDisco().getDisco(i);
-                if(instr!=null){
+                if (instr != null) {
                     pc.getCPU().setIR(instr);
                     pc.interprete(instr);
-                    proceso.setPc(i+1);
+                    proceso.setPc(i + 1);
+
+                    int tiempoInstr = pc.getTimer(instr);
+                    try {
+                        Thread.sleep(tiempoInstr);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+
+                    // actualizar UI de memoria y BCP en el hilo de Swing
                     pc.actualizarBCPDesdeCPU(proceso);
-                    pc.guardarBCPMemoria(proceso,indice);
-                    updateMemoria(proceso,indice);
+                    pc.guardarBCPMemoria(proceso, finalIndice);
+                    updateMemoria(proceso, finalIndice);
                     actualizarBCP(proceso);
+                    
                 }
             }
-            
+
+            // finalizar proceso
             proceso.setEstado("finalizado");
             proceso.setTiempoFin(System.currentTimeMillis());
             proceso.setTiempoTotal(proceso.getTiempoFin() - proceso.getTiempoInicio());
-            updateBCP(proceso,indice);
+            updateBCP(proceso, finalIndice);
             agregarEstadosTabla(proceso.getArchivos());
-            indice+=16;
+            
+
+            indice += 16;
         }
-     
-    }
+    }).start(); 
+}
+
     public void updateBCP(BCP proceso,int indice){
         pc.guardarBCPMemoria(proceso,indice);
         updateMemoria(proceso,indice);
