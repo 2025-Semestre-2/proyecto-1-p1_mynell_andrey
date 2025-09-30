@@ -21,8 +21,11 @@ public class Controlador {
     private SistemaOperativo pc;
     private View view;
     private Estadistica estadistica;
-    private int contador =0;
     private Estadisticas est;
+    private int contador =0;
+    private boolean inicializado = false;
+    private BCP procesoActual = null;
+    private int pos = 0;
     
 
     public Controlador(SistemaOperativo pc, View view,Estadistica estadistica ) {
@@ -72,71 +75,158 @@ public class Controlador {
     }
         
     public void planificadorTrabajos() {
-    new Thread(() -> {   
-        int indice = pc.getBCP().getPc();
-        while (pc.getPlanificador().sizeCola() > 0) {
+        new Thread(() -> {   
+            int indice = pc.getBCP().getPc();
+            while (pc.getPlanificador().sizeCola() > 0) {
 
-            // tomar el proceso de la cola
-            BCP proceso = pc.getPlanificador().obeterSiguienteProceso();
+                // tomar el proceso de la cola
+                BCP proceso = pc.getPlanificador().obeterSiguienteProceso();
 
-            // pasar a preparado
-            proceso.setEstado("preparado");
-            int finalIndice = indice;
-            preparadoBCP(proceso, finalIndice);
+                // pasar a preparado
+                proceso.setEstado("preparado");
+                int finalIndice = indice;
+                preparadoBCP(proceso, finalIndice);
 
-            // pasar a ejecucion
-            proceso.setEstado("ejecucion");
-            proceso.setTiempoInicio(System.currentTimeMillis());
-            updateBCP(proceso, finalIndice);
+                // pasar a ejecucion
+                proceso.setEstado("ejecucion");
+                proceso.setTiempoInicio(System.currentTimeMillis());
+                updateBCP(proceso, finalIndice);
 
-            // ejecutar instrucciones
-            for (int i = proceso.getBase(); i < proceso.getBase() + proceso.getAlcance(); i++) {
-                String instr = pc.getDisco().getDisco(i);
-                if (instr != null) {
-                    pc.getCPU().setIR(instr);
-                    String res = pc.interprete(instr);
-                    switch(res){
-                        case "": break;
-                        case "~Exit": break;
-                        case "~Input": break;
-                        default:
-                            view.jTextArea1.append(res+"\n");
-                            break;
+                // ejecutar instrucciones
+                for (int i = proceso.getBase(); i < proceso.getBase() + proceso.getAlcance(); i++) {
+                    String instr = pc.getDisco().getDisco(i);
+                    if (instr != null) {
+                        pc.getCPU().setIR(instr);
+                        String res = pc.interprete(instr);
+                        switch(res){
+                            case "": break;
+                            case "~Exit": break;
+                            case "~Input": break;
+                            default:
+                                view.jTextArea1.append(res+"\n");
+                                break;
+                        }
+                        proceso.setPc(i + 1);
+
+                        int tiempoInstr = pc.getTimer(instr);
+                        try {
+                            Thread.sleep(tiempoInstr);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+
+                        // actualizar UI de memoria y BCP en el hilo de Swing
+                        pc.actualizarBCPDesdeCPU(proceso);
+                        pc.guardarBCPMemoria(proceso, finalIndice);
+                        updateMemoria(proceso, finalIndice);
+                        actualizarBCP(proceso);
+
                     }
-                    proceso.setPc(i + 1);
-
-                    int tiempoInstr = pc.getTimer(instr);
-                    try {
-                        Thread.sleep(tiempoInstr);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-
-                    // actualizar UI de memoria y BCP en el hilo de Swing
-                    pc.actualizarBCPDesdeCPU(proceso);
-                    pc.guardarBCPMemoria(proceso, finalIndice);
-                    updateMemoria(proceso, finalIndice);
-                    actualizarBCP(proceso);
-                    
                 }
+
+                // finalizar proceso
+                proceso.setEstado("finalizado");
+                proceso.setTiempoFin(System.currentTimeMillis());
+                proceso.setTiempoTotal(proceso.getTiempoFin() - proceso.getTiempoInicio());
+                est.agregar(proceso.getIdProceso(), proceso.getTiempoTotal()); 
+
+                updateBCP(proceso, finalIndice);
+                agregarEstadosTabla(proceso.getArchivos());
+
+                indice += 16;
+
+            }
+        }).start(); 
+
+    }
+    public void ejecutarPasoPaso(){
+        if(!inicializado){
+            int sizeMemoria = (Integer) view.getSpnMemoria().getValue();
+            int sizeDisco = (Integer) view.getSpnDisco().getValue();
+            try {
+            pc.tamannoDisco(sizeDisco);
+            pc.tamannoMemoria(sizeMemoria);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Error al inicializar el disco: " + e.getMessage());
+                return;
             }
 
-            // finalizar proceso
-            proceso.setEstado("finalizado");
-            proceso.setTiempoFin(System.currentTimeMillis());
-            proceso.setTiempoTotal(proceso.getTiempoFin() - proceso.getTiempoInicio());
-            est.agregar(proceso.getIdProceso(), proceso.getTiempoTotal()); 
+            //inicializo
+            pc.inicializarSO(sizeMemoria);
 
-            updateBCP(proceso, finalIndice);
-            agregarEstadosTabla(proceso.getArchivos());
-            est.agregar(proceso.getIdProceso(), proceso.getTiempoTotal()); 
-
-            indice += 16;
+            //guardarEnDisco();
+            pc.crearProcesos();
+            System.out.println("----");
+            System.out.println(pc.getPlanificador().getColaListos());
+            guardarEspacioSO(sizeMemoria);
+            inicializado=true;
+            pos =pc.getBCP().getPc();
             
         }
-    }).start(); 
         
-}
+        planificadorTrabajosPasoPaso();
+        
+    }
+    public void planificadorTrabajosPasoPaso() {
+        
+        if(procesoActual==null){
+            if(pc.getPlanificador().sizeCola() == 0){
+                JOptionPane.showMessageDialog(null, "Error: No hay procesos en cola");
+                return;
+            }
+            
+            // tomar el proceso de la cola
+            procesoActual = pc.getPlanificador().obeterSiguienteProceso();
+            
+            // pasar a preparado
+            procesoActual.setEstado("preparado");
+            
+            preparadoBCP(procesoActual, pos);
+
+            // pasar a ejecucion
+            procesoActual.setEstado("ejecucion");
+            procesoActual.setTiempoInicio(System.currentTimeMillis());
+            updateBCP(procesoActual, pos);
+        }
+        
+
+        // ejecutar instrucciones}
+        int posIntr = procesoActual.getBase()+contador;
+        if(contador < procesoActual.getAlcance()) {
+            String instr = pc.getDisco().getDisco(posIntr);
+            if (instr != null) {
+                pc.getCPU().setIR(instr);
+                pc.interprete(instr);
+                procesoActual.setPc(posIntr + 1);
+
+                // actualizar UI de memoria y BCP en el hilo de Swing
+                pc.actualizarBCPDesdeCPU(procesoActual);
+                pc.guardarBCPMemoria(procesoActual, pos);
+                updateMemoria(procesoActual, pos);
+                actualizarBCP(procesoActual);
+
+            }
+            contador++;
+        }
+        else{
+            // finalizar proceso
+            System.out.println(pos);
+          
+            procesoActual.setEstado("finalizado");
+            procesoActual.setTiempoFin(System.currentTimeMillis());
+            procesoActual.setTiempoTotal(procesoActual.getTiempoFin() - procesoActual.getTiempoInicio());
+            est.agregar(procesoActual.getIdProceso(), procesoActual.getTiempoTotal()); 
+
+            updateBCP(procesoActual, pos);
+            agregarEstadosTabla(procesoActual.getArchivos());
+         
+            pos += 16; //indice
+            contador =0; // contador
+            procesoActual=null;
+
+
+        }
+    }
 
     public void updateBCP(BCP proceso,int indice){
         pc.guardarBCPMemoria(proceso,indice);
@@ -155,48 +245,6 @@ public class Controlador {
         for(String arch:archivos){
             view.addFilaES(i,arch);
             i++;
-        }
-    }
-    
-    
-    public void ejecutarPasoPaso(){
-        int sizeMemoria = (Integer) view.getSpnMemoria().getValue();
-        int sizeDisco = (Integer) view.getSpnDisco().getValue();
-        System.out.println("tamano memoria: "+sizeMemoria+" , "+sizeDisco);
-        List<String> instr = pc.getIntr();
-        if(instr.isEmpty()){
-            JOptionPane.showMessageDialog(null,"Error: No hay intrucciones para leer");
-            return;
-        }
-        
-        try{
-            if(contador == 0){
-                System.out.println("entra");
-                //limpio
-                view.getModelProgram().setRowCount(0);
-                view.getModelMemory().setRowCount(0);
-                //guardo tamaño de memoria
-                pc.tamannoDisco(sizeDisco);
-                pc.tamannoMemoria(sizeMemoria);
-                //pc.guardarInstrucciones(instr);
-                //inicializo
-                pc.inicializarSO(sizeMemoria);
-            }
-            
-            String i = instr.get(contador);
-           
-            //cargo
-            pc.cargarSO(i);
-            //ejecuto
-            pc.pasoPaso();
-            //updateProgram(i);
-            updateMemoria(i);
-            //updateBCP(pc.getCPU());
-            contador++;
-        } catch (IndexOutOfBoundsException e) {
-            JOptionPane.showMessageDialog(null, "Fin de instrucciones: " + e.getMessage());
-        } catch (IOException ex) {
-            System.getLogger(Controlador.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
     }
 

@@ -9,18 +9,7 @@ import java.io.IOException;
 import java.util.*;
 import javax.swing.JOptionPane;
 
-/**
- *
- * @author Andrey
- */
-/*
-["arch1:5","arch2:12","arch3:18","arch4:24","arch5:30",
-"mov ax, 5","mov bx, 3","load ax","add bx","sub ax","store ax","mov bx, -8",
-"mov ax, 10","mov bx, 2","sub bx","add ax","store bx","mov cx, 7",
-"mov cx, 4","mov dx, 6","load cx","add dx","store cx","mov ax, 12",
-"mov ax, 1","mov bx, 1","add bx","add ax","store bx","mov dx, 9",
-"mov ax, 15","mov bx, 5","sub bx","load bx","add ax","store ax","mov cx, -3"]
-*/
+
 public class SistemaOperativo {
     private BCP bcp;
     private CPU cpu;
@@ -103,23 +92,6 @@ public class SistemaOperativo {
     }
    
 
-    public void pasoPaso(){
-        System.out.println("tamaño disco: "+disco.size());
-        int pc = cpu.getPC();
-        if(pc >= disco.size()){
-            JOptionPane.showConfirmDialog(null, "Fin de la disco" );
-            return;
-        }
-        //se toma instruccion que se acaba de cargar
-        String instr = disco.getDisco(pc);
-        if(instr == null){
-            JOptionPane.showConfirmDialog(null, "No hay instrucciones en la posicion "+pc );
-            return;
-        }
-        cpu.setIR(instr);
-        interprete(instr);
-        cpu.setPC(pc+1);
-    }
     
     
 
@@ -380,7 +352,6 @@ public class SistemaOperativo {
         bcp.setCx(cpu.getCX());
         bcp.setDx(cpu.getDX());
         bcp.setIr(cpu.getIR());
-        bcp.setPc(cpu.getPC());
     }
     
 
