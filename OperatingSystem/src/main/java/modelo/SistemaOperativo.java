@@ -163,6 +163,33 @@ public class SistemaOperativo {
                 cpu.setAC(cpu.getAC()+getRegistro(partes[1]));
                 break;
             case "inc":
+                if(partes.length == 1){
+                    cpu.setAC(cpu.getAC()+1);
+                }else{
+                    switch(partes[1]){
+                    case "ax": cpu.setAX(cpu.getAX()+1); break;
+                    case "bx": cpu.setBX(cpu.getBX()+1); break; 
+                    case "cx": cpu.setCX(cpu.getCX()+1); break;
+                    case "dx": cpu.setDX(cpu.getDX()+1);break; 
+                    }
+                }
+                break;
+            case "dec":
+                if(partes.length == 1){
+                    cpu.setAC(cpu.getAC()-1);
+                }else{
+                    switch(partes[1]){
+                    case "ax": cpu.setAX(cpu.getAX()-1); break;
+                    case "bx": cpu.setBX(cpu.getBX()-1); break; 
+                    case "cx": cpu.setCX(cpu.getCX()-1); break;
+                    case "dx": cpu.setDX(cpu.getDX()-1);break; 
+                    }
+                }
+                break;
+            case "swap":
+                int temp = getRegistro(partes[1]);
+                movRegistro(partes[1],getRegistro(partes[2]));
+                movRegistro(partes[2], temp);
                 break;
         }
     }
