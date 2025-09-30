@@ -76,21 +76,27 @@ public class Controlador {
         
     public void planificadorTrabajos() {
         new Thread(() -> {   
+            int cpu = 0;
             int indice = pc.getBCP().getPc();
             while (pc.getPlanificador().sizeCola() > 0) {
 
                 // tomar el proceso de la cola
                 BCP proceso = pc.getPlanificador().obeterSiguienteProceso();
-
+                if(cpu>5){
+                    proceso.setEstado("nuevo");
+                    proceso.setCpuAsig("hilo"+cpu);
+                    cpu =1;
+                }
+                proceso.setCpuAsig("hilo"+cpu);
+                preparadoBCP(proceso, indice);//este para añadir el nuevo a los estados
                 // pasar a preparado
                 proceso.setEstado("preparado");
-                int finalIndice = indice;
-                preparadoBCP(proceso, finalIndice);
+                updateBCP(proceso, indice);
 
                 // pasar a ejecucion
                 proceso.setEstado("ejecucion");
                 proceso.setTiempoInicio(System.currentTimeMillis());
-                updateBCP(proceso, finalIndice);
+                updateBCP(proceso, indice);
 
                 // ejecutar instrucciones
                 for (int i = proceso.getBase(); i < proceso.getBase() + proceso.getAlcance(); i++) {
@@ -117,8 +123,8 @@ public class Controlador {
 
                         // actualizar UI de memoria y BCP en el hilo de Swing
                         pc.actualizarBCPDesdeCPU(proceso);
-                        pc.guardarBCPMemoria(proceso, finalIndice);
-                        updateMemoria(proceso, finalIndice);
+                        pc.guardarBCPMemoria(proceso, indice);
+                        updateMemoria(proceso, indice);
                         actualizarBCP(proceso);
 
                     }
@@ -130,10 +136,11 @@ public class Controlador {
                 proceso.setTiempoTotal(proceso.getTiempoFin() - proceso.getTiempoInicio());
                 est.agregar(proceso.getIdProceso(), proceso.getTiempoTotal()); 
 
-                updateBCP(proceso, finalIndice);
+                updateBCP(proceso, indice);
                 agregarEstadosTabla(proceso.getArchivos());
 
                 indice += 16;
+                cpu++;
 
             }
         }).start(); 

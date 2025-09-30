@@ -38,7 +38,7 @@ public class BCP {
 
     public BCP(int idProceso, String estado, int prioridad, int base, int alcance) {
         this.idProceso = idProceso;
-        this.estado = "nuevo";
+        this.estado = estado;
         this.prioridad = prioridad;
         this.base = base;
         this.alcance = alcance;
@@ -48,7 +48,7 @@ public class BCP {
         this.tiempoTotal = 0;
     }
     public BCP() {
-        this.estado = "nuevo";
+        this.estado = estado;
         this.prioridad = 1;
         this.base = 0;
         this.alcance = 0;
