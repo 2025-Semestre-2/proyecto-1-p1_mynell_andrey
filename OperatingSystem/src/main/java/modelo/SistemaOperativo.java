@@ -29,7 +29,7 @@ public class SistemaOperativo {
     private Planificador plan;
     private List<String> instrucciones;
     private Queue<BCP> colaProcesos; //FIFO
-   
+    private boolean cmpBandera = false;
     
   
     public SistemaOperativo(){
@@ -143,7 +143,7 @@ public class SistemaOperativo {
         return 0;
     }
 
-    public void interprete(String instr){
+    public String interprete(String instr){
         String[] partes = instr.split(" ");
         String op = partes[0].toLowerCase();
         switch(op){
@@ -166,7 +166,7 @@ public class SistemaOperativo {
                 if(partes.length == 1){
                     cpu.setAC(cpu.getAC()+1);
                 }else{
-                    switch(partes[1]){
+                    switch(partes[1].toLowerCase()){
                     case "ax": cpu.setAX(cpu.getAX()+1); break;
                     case "bx": cpu.setBX(cpu.getBX()+1); break; 
                     case "cx": cpu.setCX(cpu.getCX()+1); break;
@@ -178,7 +178,7 @@ public class SistemaOperativo {
                 if(partes.length == 1){
                     cpu.setAC(cpu.getAC()-1);
                 }else{
-                    switch(partes[1]){
+                    switch(partes[1].toLowerCase()){
                     case "ax": cpu.setAX(cpu.getAX()-1); break;
                     case "bx": cpu.setBX(cpu.getBX()-1); break; 
                     case "cx": cpu.setCX(cpu.getCX()-1); break;
@@ -191,7 +191,56 @@ public class SistemaOperativo {
                 movRegistro(partes[1],getRegistro(partes[2]));
                 movRegistro(partes[2], temp);
                 break;
+            case "int":
+                switch(partes[1].toLowerCase()){
+                    case "20h":
+                        return "~Exit";
+                    case "10h":
+                        return Integer.toString(cpu.getDX());
+                    case "9h":
+                        return "~Input";
+                    case "21h":
+                        break;
+                }
+                break;
+            case "jmp":
+                int jmp = cpu.getPC()+ Integer.parseInt(partes[1]);
+                cpu.setPC((jmp >= 0)? jmp:0);
+                break;
+            case "cmp":
+                cmpBandera = getRegistro(partes[1]) == getRegistro(partes[2]);
+                break;
+            case "je":
+                if (cmpBandera){
+                    int je = cpu.getPC()+ Integer.parseInt(partes[1]);
+                    cpu.setPC((je >= 0)? je:0);
+                }
+                break;
+            case "jne":
+                if (!cmpBandera){
+                    int jne = cpu.getPC()+ Integer.parseInt(partes[1]);
+                    cpu.setPC((jne >= 0)? jne:0);
+                }
+                break;
+            case "param":
+                for (int i= 1; i<partes.length;i++){
+                    plan.verSiguiente().getPila().push(Integer.parseInt(partes[i].replace(",","")));
+                }
+                break;
+            case "push":
+                plan.verSiguiente().getPila().push((Integer)getRegistro(partes[1]));
+                break;
+            case "pop":
+                int pop = plan.verSiguiente().getPila().pop();
+                switch(partes[1].toLowerCase()){
+                case "ax": cpu.setAX(pop); break;
+                case "bx": cpu.setBX(pop); break; 
+                case "cx": cpu.setCX(pop); break;
+                case "dx": cpu.setDX(pop); break; 
+                }
+                break;
         }
+        return "";
     }
     public int getValue(String val){
         int time =0;
