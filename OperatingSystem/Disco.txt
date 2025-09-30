@@ -1,8 +1,8 @@
 test.asm|50|6
 test2.asm|56|7
 test3.asm|63|6
-
-
+test2.asm|69|2
+test2.asm|71|2
 
 
 
@@ -67,3 +67,7 @@ sub bx
 add ax
 store bx
 mov cx, 7
+mov dx, 20
+int 10h
+mov dx, 20
+int 10h

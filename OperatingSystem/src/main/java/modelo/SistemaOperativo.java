@@ -40,6 +40,7 @@ public class SistemaOperativo {
         plan = new Planificador();
         try {
             this.disco = new Disco("Disco.txt", 512);
+            instrucciones = disco.getDatos();
         } catch (IOException ex) {
             System.getLogger(SistemaOperativo.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
@@ -144,6 +145,7 @@ public class SistemaOperativo {
     }
 
     public String interprete(String instr){
+        System.out.println(instr);
         String[] partes = instr.split(" ");
         String op = partes[0].toLowerCase();
         switch(op){
@@ -197,7 +199,7 @@ public class SistemaOperativo {
                         return "~Exit";
                     case "10h":
                         return Integer.toString(cpu.getDX());
-                    case "9h":
+                    case "09h":
                         return "~Input";
                     case "21h":
                         break;

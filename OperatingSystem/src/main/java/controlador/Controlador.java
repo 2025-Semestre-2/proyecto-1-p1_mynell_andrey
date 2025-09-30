@@ -65,6 +65,7 @@ public class Controlador {
     }
  
     public void guardarEspacioSO(int size){
+        view.getModelMemory().setRowCount(0);
         for(int i =0;i<pc.getEspacioSO(size);i++){
             view.addFilaMemoria(Integer.toString(i), "<so>");
         }
@@ -93,7 +94,15 @@ public class Controlador {
                 String instr = pc.getDisco().getDisco(i);
                 if (instr != null) {
                     pc.getCPU().setIR(instr);
-                    pc.interprete(instr);
+                    String res = pc.interprete(instr);
+                    switch(res){
+                        case "": break;
+                        case "~Exit": break;
+                        case "~Input": break;
+                        default:
+                            view.jTextArea1.append(res+"\n");
+                            break;
+                    }
                     proceso.setPc(i + 1);
 
                     int tiempoInstr = pc.getTimer(instr);
