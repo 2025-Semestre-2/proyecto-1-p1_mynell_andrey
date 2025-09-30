@@ -15,17 +15,20 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import modelo.CPU;
 import modelo.BCP;
+import modelo.Estadisticas;
 
 public class Controlador {
     private SistemaOperativo pc;
     private View view;
     private Estadistica estadistica;
     private int contador =0;
+    private Estadisticas est;
     
 
     public Controlador(SistemaOperativo pc, View view,Estadistica estadistica ) {
         this.pc = pc;
         this.view = view;
+        this.est = new Estadisticas();
   
         this.estadistica = estadistica;
         this.view.btnBuscarListener(e -> buscarArchivo());
@@ -113,13 +116,17 @@ public class Controlador {
             proceso.setEstado("finalizado");
             proceso.setTiempoFin(System.currentTimeMillis());
             proceso.setTiempoTotal(proceso.getTiempoFin() - proceso.getTiempoInicio());
+            est.agregar(proceso.getIdProceso(), proceso.getTiempoTotal()); 
+
             updateBCP(proceso, finalIndice);
             agregarEstadosTabla(proceso.getArchivos());
-            
+            est.agregar(proceso.getIdProceso(), proceso.getTiempoTotal()); 
 
             indice += 16;
+            
         }
     }).start(); 
+        
 }
 
     public void updateBCP(BCP proceso,int indice){
@@ -143,31 +150,6 @@ public class Controlador {
     }
     
     
-    public void guardarEnDisco(){
-        
-        List<String> instr = pc.getIntr();
-        if(instr.isEmpty()){
-            JOptionPane.showMessageDialog(null,"Error: No hay intrucciones para leer");
-            return;
-        }
-
-        for(int i = 0; i < instr.size(); i++){
-            String instruccion = instr.get(i);
-            
-            if(i>=pc.numProcesos()){
-                //updateProgram(instruccion);
-                System.out.println("hola"+instruccion);}
-            //cargo
-            pc.cargarSO(instruccion);
-            //ejecuto
-            pc.pasoPaso();
-           // updateProgram(i);
-            //updateDisco(instruccion);
-           // updateBCP(pc.getCPU());
-           
-        }
-  
-    }
     public void ejecutarPasoPaso(){
         int sizeMemoria = (Integer) view.getSpnMemoria().getValue();
         int sizeDisco = (Integer) view.getSpnDisco().getValue();
@@ -325,7 +307,10 @@ public class Controlador {
 
     private void mostrarEstadistica(){
        // view.dispose(); cierro ventana principal
+       
         estadistica.setVisible(true);
+        estadistica.mostrarGraficoBarras(est.getRegistros());
+        System.out.println(est.toString());
     }
 
     private void volverEst(){
