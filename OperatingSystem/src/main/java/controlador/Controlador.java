@@ -175,7 +175,7 @@ public class Controlador {
         
     }
     public void planificadorTrabajosPasoPaso() {
-        
+        int cpu=0;
         if(procesoActual==null){
             if(pc.getPlanificador().sizeCola() == 0){
                 JOptionPane.showMessageDialog(null, "Error: No hay procesos en cola");
@@ -184,7 +184,13 @@ public class Controlador {
             
             // tomar el proceso de la cola
             procesoActual = pc.getPlanificador().obeterSiguienteProceso();
-            
+            if(cpu>5){
+                    procesoActual.setEstado("nuevo");
+                    procesoActual.setCpuAsig("hilo"+cpu);
+                    cpu =1;
+                }
+            procesoActual.setCpuAsig("hilo"+cpu);
+            preparadoBCP(procesoActual, pos);//este para añadir el nuevo a los estados
             // pasar a preparado
             procesoActual.setEstado("preparado");
             
@@ -214,6 +220,7 @@ public class Controlador {
 
             }
             contador++;
+            
         }
         else{
             // finalizar proceso
@@ -230,6 +237,7 @@ public class Controlador {
             pos += 16; //indice
             contador =0; // contador
             procesoActual=null;
+            cpu++;
 
 
         }
@@ -352,6 +360,8 @@ public class Controlador {
     public void cleanAll(){
         view.getModelProgram().setRowCount(0);
         view.getModelMemory().setRowCount(0);
+        view.getModelPila().setRowCount(0);
+        view.getModelArchivos().setRowCount(0);
         pc.getCPU().reset();
         pc.ClearDisk();
         contador =0;
@@ -362,7 +372,15 @@ public class Controlador {
         view.setlblCX("---");
         view.setlblDX("---");
         view.setlblPC("---");
-        view.getSpnMemoria().setValue(100);
+        
+        view.setlbEnlace("---");
+        view.setlbCPU("---");
+        view.setlbBase("---");
+        view.setlbAlcance("---");
+        view.setlblPrioridad("---");
+        
+        view.getSpnMemoria().setValue(512);
+        view.getSpnDisco().setValue(512);
         showDisk();
         JOptionPane.showMessageDialog(null, "Sistema limpiado correctamente");
         

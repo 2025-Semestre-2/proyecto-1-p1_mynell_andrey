@@ -220,13 +220,13 @@ public class SistemaOperativo {
         int time =0;
         switch(val){
             case "20h":
-                time= 3000;
+                time= 2000;
                 break;
             case "10h":
                 time= 2000;
                 break;
             case "9h":
-                time= 3000;
+                time= 500; //tiempo int - entrada de usuario
                 break;
             case "21h":
                 time= 5000;
@@ -241,19 +241,19 @@ public class SistemaOperativo {
         int time =0;
         switch(op){
             case "load":
-                time= 1000;
+                time= 2000;
                 break;
             case "store":
-                time= 1000;
+                time= 2000;
                 break;
             case "mov":
                 time= 1000;
                 break;
             case "sub":
-                time= 1000;
+                time= 3000;
                 break;
             case "add":
-                time= 1000;
+                time= 3000;
                 break;
             case "inc":
                 time= 1000;

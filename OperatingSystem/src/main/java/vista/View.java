@@ -745,6 +745,12 @@ public class View extends javax.swing.JFrame {
     public DefaultTableModel getModelMemory(){
         return (DefaultTableModel) jTable2.getModel();
     }
+    public DefaultTableModel getModelPila(){
+        return (DefaultTableModel) jTable7.getModel();
+    }
+    public DefaultTableModel getModelArchivos(){
+        return (DefaultTableModel) jTable6.getModel();
+    }
     
     public void addFilaES(int fila,String colum1){
         DefaultTableModel model = (DefaultTableModel) jTable6.getModel();
