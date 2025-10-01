@@ -2,18 +2,18 @@ package controlador;
 
 import static controlador.Utilidades.leerArchivo;
 import static controlador.Utilidades.seleccionarArchivos;
+import java.awt.HeadlessException;
 import modelo.SistemaOperativo;
 
 import vista.View;
 
 import vista.Estadistica;
-import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import modelo.CPU;
 import modelo.BCP;
 import modelo.Estadisticas;
 
@@ -38,9 +38,14 @@ public class Controlador {
         this.view.btnEjecutar(e -> ejecutarSO());
         this.view.btnLimpiar(e -> cleanAll());
         this.view.btnPasoListener(e -> ejecutarPasoPaso());
-       
+        try {
+            this.view.setDiskSize(pc.getDisco().size());
+        } catch (IOException ex) {
+            System.getLogger(Controlador.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
         this.view.btnVerEst(e -> mostrarEstadistica());
         this.estadistica.btnVolver(e -> volverEst());
+        this.view.discoStageChange(e -> spinnerTamano());
         showDisk();
 
     }
@@ -48,8 +53,8 @@ public class Controlador {
         int sizeMemoria = (Integer) view.getSpnMemoria().getValue();
         int sizeDisco = (Integer) view.getSpnDisco().getValue();
         try {
-        pc.tamannoDisco(sizeDisco);
-        pc.tamannoMemoria(sizeMemoria);
+            pc.tamannoDisco(sizeDisco);
+            pc.tamannoMemoria(sizeMemoria);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Error al inicializar el disco: " + e.getMessage());
             return;
@@ -72,6 +77,20 @@ public class Controlador {
         for(int i =0;i<pc.getEspacioSO(size);i++){
             view.addFilaMemoria(Integer.toString(i), "<so>");
         }
+    }
+    
+    public void spinnerTamano(){
+        try {
+            this.pc.tamannoDisco((int) this.view.getSpnDisco().getValue());
+        } catch (IOException ex) {
+            try {
+                this.view.getSpnDisco().setValue(this.pc.getDisco().size());
+            } catch (IOException ex1) {
+                System.getLogger(Controlador.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex1);
+            }
+            JOptionPane.showMessageDialog(null, "No se puede reducir espacio utilizado ");
+        }
+        showDisk();
     }
         
     public void planificadorTrabajos() {
@@ -107,7 +126,24 @@ public class Controlador {
                         switch(res){
                             case "": break;
                             case "~Exit": break;
-                            case "~Input": break;
+                            case "~Input": 
+                                CountDownLatch latch = new CountDownLatch(1);
+                                final String[] dato = new String[1];
+                                this.view.jTextField1.addActionListener(e ->{
+                                    dato[0] = this.view.jTextField1.getText();
+                                    this.view.jTextField1.setText("");
+                                    latch.countDown();
+                                });
+                                {
+                                    try {
+                                        latch.await();
+                                        this.pc.movRegistro("DX", Integer.parseInt(dato[0]));
+                                    } catch (InterruptedException ex) {
+                                        System.getLogger(Controlador.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                                    }
+                                }
+                                break;
+
                             default:
                                 view.jTextArea1.append(res+"\n");
                                 break;
@@ -337,8 +373,8 @@ public class Controlador {
                     pc.getIntr();
                     JOptionPane.showMessageDialog(null,"Archivo leido correctamente");
 
-                } catch(Exception e){
-                    JOptionPane.showConfirmDialog(null, "Error al leer el archivo" + e.getMessage());
+                } catch(HeadlessException | IOException e){
+                    JOptionPane.showMessageDialog(null, "No existe espacio suficiente en disco para cargar");
                 }
             }
         }
@@ -346,14 +382,11 @@ public class Controlador {
     }
     
     private void showDisk(){
-        List<String> disco= pc.getDisk();
+        List<String> disco= pc.getDataDisk();
         DefaultTableModel modelo = (DefaultTableModel) this.view.jTable3.getModel();
         modelo.setRowCount(0);
         for(int i = 0;i<disco.size();i++){
             modelo.addRow(new Object[]{i, disco.get(i)});
-        }
-        for(int i = disco.size(); i<pc.getDisco().size(); i++){
-            modelo.addRow(new Object[]{i, ""});
         }
     }
 

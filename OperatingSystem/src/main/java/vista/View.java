@@ -8,6 +8,7 @@ import controlador.Controlador;
 import controlador.Utilidades;
 import java.awt.event.ActionListener;
 import javax.swing.JSpinner;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -141,22 +142,12 @@ public class View extends javax.swing.JFrame {
         btnEjecutar.setText("▷");
         btnEjecutar.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         btnEjecutar.setFocusable(false);
-        btnEjecutar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnEjecutarActionPerformed(evt);
-            }
-        });
 
         btnPaso.setBackground(new java.awt.Color(252, 252, 252));
         btnPaso.setForeground(new java.awt.Color(0, 153, 51));
         btnPaso.setText("⏭");
         btnPaso.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         btnPaso.setFocusable(false);
-        btnPaso.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPasoActionPerformed(evt);
-            }
-        });
 
         btnLimpiar.setBackground(new java.awt.Color(252, 252, 252));
         btnLimpiar.setForeground(new java.awt.Color(0, 153, 51));
@@ -170,11 +161,6 @@ public class View extends javax.swing.JFrame {
         btnBuscar.setText("🗁");
         btnBuscar.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         btnBuscar.setFocusable(false);
-        btnBuscar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBuscarActionPerformed(evt);
-            }
-        });
 
         btnLimpiar1.setBackground(new java.awt.Color(252, 252, 252));
         btnLimpiar1.setForeground(new java.awt.Color(0, 153, 51));
@@ -188,11 +174,6 @@ public class View extends javax.swing.JFrame {
         btnEstadistica.setText("🛈");
         btnEstadistica.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         btnEstadistica.setFocusable(false);
-        btnEstadistica.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnEstadisticaActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -661,23 +642,6 @@ public class View extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnEjecutarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEjecutarActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnEjecutarActionPerformed
-
-    private void btnPasoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPasoActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnPasoActionPerformed
-
-    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
-        // TODO add your handling code here:
-      
-    }//GEN-LAST:event_btnBuscarActionPerformed
-
-    private void btnEstadisticaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEstadisticaActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnEstadisticaActionPerformed
-
     /**
      * @param args the command line arguments
      */
@@ -789,6 +753,9 @@ public class View extends javax.swing.JFrame {
     public void btnLimpiar(ActionListener al) {
         btnLimpiar.addActionListener(al);
     }
+    public void discoStageChange(ChangeListener listener){
+        sptadisco.addChangeListener(listener);
+    }
     //add
     
  
@@ -800,6 +767,10 @@ public class View extends javax.swing.JFrame {
     }
     public JSpinner getSpnDisco(){
         return sptadisco;
+    }
+    
+    public void setDiskSize(int i){
+        this.sptadisco.setValue(i);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -854,7 +825,7 @@ public class View extends javax.swing.JFrame {
     private javax.swing.JTable jTable6;
     private javax.swing.JTable jTable7;
     public javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextField jTextField1;
+    public javax.swing.JTextField jTextField1;
     private javax.swing.JLabel lbAlcance;
     private javax.swing.JLabel lbBase;
     private javax.swing.JLabel lbCPU;

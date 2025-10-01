@@ -4,7 +4,6 @@
  */
 package modelo;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import javax.swing.JOptionPane;
@@ -28,7 +27,7 @@ public class SistemaOperativo {
         colaProcesos = new LinkedList<>(); 
         plan = new Planificador();
         try {
-            this.disco = new Disco("Disco.txt", 512);
+            this.disco = new Disco("Disco.txt");
             instrucciones = disco.getDatos();
         } catch (IOException ex) {
             System.getLogger(SistemaOperativo.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
@@ -39,28 +38,18 @@ public class SistemaOperativo {
 }
 
     public void tamannoDisco(int sizeDisco) throws IOException {
-        String basePath = System.getProperty("user.dir");
-        String ruta = basePath + File.separator + "Disco.txt";
-        this.disco = new Disco(ruta, sizeDisco);
+        this.disco.cambiarTamano(sizeDisco);
     }
-    public void guardarInstrucciones(String nombreArchivo,List<String> lista){
-        try {
-            disco.crearArchivo(nombreArchivo, lista);
-        } catch (IOException ex) {
-            System.getLogger(SistemaOperativo.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-        }
-        try {
-            instrucciones = disco.getDatos();
-        } catch (IOException ex) {
-            System.getLogger(SistemaOperativo.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-        }
+    public void guardarInstrucciones(String nombreArchivo,List<String> lista) throws IOException{
+        disco.crearArchivo(nombreArchivo, lista);
+        instrucciones = disco.getDatos();
     }
     
     public void ClearDisk(){
         disco.ClearAll();
     }
     
-    public List<String> getDisk(){
+    public List<String> getDataDisk(){
         try {
             return disco.leerTodo();
         } catch (IOException ex) {
@@ -83,18 +72,18 @@ public class SistemaOperativo {
 
     public void cargarSO(String instr){
         int pos = cpu.getPC();
-        if(pos <= disco.size()){
-            disco.setDisco(pos,instr);
-            pos++;
-        } else{
+        try {
+            if(pos <= disco.size()){
+                disco.setDisco(pos,instr);
+                pos++;
+            } else{
+                JOptionPane.showConfirmDialog(null, "Error al leer el archivo" );   
+            }
+        } catch (IOException ex) {
             JOptionPane.showConfirmDialog(null, "Error al leer el archivo" );
-        }   
+        }
     }
-   
-
     
-    
-
     public void movRegistro(String registro,int valor){
         switch(registro.replace(",", "").toLowerCase()){
             case "ax":cpu.setAX(valor);break;

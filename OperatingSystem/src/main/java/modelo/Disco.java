@@ -15,27 +15,22 @@ import java.util.List;
 
 /**
  *
- * @author Andrey
+ * @author Mynell
 Clase Disco, que representa la disco principal de la minipc
 Objetivo: Almcenar las intrucciones en la posicion indicada
  */
 public class Disco {
     private final File discoFile;
     private final int indices= 50;
-    private final int TAMANO;
     
-    /**
-     * Contructor que inicializa el tamaño de la disco
-     */
-    public Disco(String rutaDisco, int tamano)throws IOException{
+    public Disco(String rutaDisco)throws IOException{
         this.discoFile = new File(rutaDisco);
-        this.TAMANO = tamano;
         if (!discoFile.exists()) inicializarArchivo();
     }
     private void inicializarArchivo() throws IOException {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(discoFile))) {
-            for (int i = 0; i < indices; i++) {
-                bw.write("\n");
+            for (int i = 0; i < 512; i++) {
+                bw.newLine();
             }
         }
     }
@@ -53,7 +48,14 @@ public class Disco {
     
     public List<String> getDatos() throws IOException{
         List<String> lista = leerTodo();
-        return lista.subList(50, lista.size());
+        int limite = lista.size(); 
+        for (int i = indices; i < lista.size(); i++) {
+            if (lista.get(i).trim().isEmpty()) { 
+                limite = i; 
+                break;
+            }
+        }
+        return lista.subList(indices, limite);
     }
     
     private void escribirTodo(List<String> lineas) throws IOException {
@@ -80,26 +82,37 @@ public class Disco {
     public void crearArchivo(String nombre, List<String> contenido) throws IOException {
         List<String> lineas = leerTodo();
         
-        int datosActuales = Math.max(0, lineas.size() - indices);
-        if (datosActuales + contenido.size() > TAMANO-indices) {
-            throw new IOException("Espacio insuficiente en el disco");
-        }
-        
-        int posicionInicio = Math.max(lineas.size(), indices);
         int longitud = contenido.size();
-        while (lineas.size() < indices) lineas.add("");
-        lineas.addAll(contenido);
-        boolean agregado = false;
-        for (int i = 0; i < indices; i++) {
-            if (i >= lineas.size()) lineas.add("");
+        int posicionInicio = -1;
+        int contador = 0;
+        for (int i = indices; i < lineas.size(); i++) {
             if (lineas.get(i).trim().isEmpty()) {
-                lineas.set(i, nombre + "|" + posicionInicio + "|" + longitud);
-                agregado = true;
-                break;
+                contador++;
+                if (contador == longitud) {
+                    posicionInicio = i - longitud + 1;
+                    break;
+                }
+            } else {
+                contador = 0;
             }
         }
-        if (!agregado) throw new IOException("Índice lleno (las primeras 50 líneas están ocupadas)");
-        escribirTodo(lineas);
+        if (posicionInicio != -1) {
+            for (int i = 0; i < longitud; i++) {
+                lineas.set(posicionInicio + i, contenido.get(i));
+            }
+            boolean agregado = false;
+            for (int i = 0; i < indices; i++) {
+                if (lineas.get(i).trim().isEmpty()) {
+                    lineas.set(i, nombre + "|" + posicionInicio + "|" + longitud);
+                    agregado = true;
+                    break;
+                }
+            }
+            if (!agregado) throw new IOException("Índice lleno");
+            escribirTodo(lineas);
+        }else{
+            throw new IOException("Espacio en Disco Insuficiente");
+        }
     }
     
     public List<String> leerArchivo(String nombre) throws IOException {
@@ -111,7 +124,7 @@ public class Disco {
                 int inicio = Integer.parseInt(parts[1]);
                 int longitud = Integer.parseInt(parts[2]);
                 List<String> contenido = new ArrayList<>();
-                for (int j = inicio - 1; j < inicio - 1 + longitud && j < lineas.size(); j++) {
+                for (int j = inicio; j < inicio+ longitud && j < lineas.size(); j++) {
                     contenido.add(lineas.get(j));
                 }
                 return contenido;
@@ -124,12 +137,21 @@ public class Disco {
         List<String> lineas = leerTodo();
         for (int i = 0; i < indices && i < lineas.size(); i++) {
             if (lineas.get(i).startsWith(nombre + "|")) {
+                String[] partes = lineas.get(i).split("\\|");
+                if (partes.length == 3) {
+                    int inicio = Integer.parseInt(partes[1]);
+                    int cantidad = Integer.parseInt(partes[2]);
+                    for (int j = inicio; j < inicio + cantidad && j < lineas.size(); j++) {
+                        lineas.set(j, "");
+                    }
+                }
                 lineas.set(i, "");
                 break;
             }
         }
         escribirTodo(lineas);
     }
+
     
     public void setDisco (int pos, String contenido){
         try {
@@ -159,7 +181,24 @@ public class Disco {
         }
     }
     
-    public int size() {
-        return TAMANO;
+    public void cambiarTamano(int nuevoTamano) throws IOException {
+        List<String> lineas = leerTodo();
+        if(nuevoTamano>indices){
+            if (nuevoTamano >= lineas.size()) {
+                while(lineas.size()<nuevoTamano){
+                    lineas.add("");
+                }
+                escribirTodo(lineas);
+            }else{
+                if (!lineas.get(nuevoTamano).trim().isEmpty()) {
+                    throw new IOException("No se puede reducir: existen datos en el rango a eliminar.");
+                }else escribirTodo(lineas.subList(0, nuevoTamano));
+            }
+        }else throw new IOException("No se puede reducir: existen datos en el rango a eliminar.");
+    }
+
+    
+    public int size() throws IOException {
+        return leerTodo().size();
     }
 }

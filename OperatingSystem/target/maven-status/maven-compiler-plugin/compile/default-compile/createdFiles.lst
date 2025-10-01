@@ -1,8 +1,5 @@
 controlador\Utilidades.class
-vista\View$3.class
 vista\View.class
-vista\View$1.class
-vista\View$2.class
 modelo\CPU.class
 mvc\Main.class
 vista\Estadistica$1.class
@@ -11,7 +8,6 @@ modelo\Planificador.class
 vista\Estadistica.class
 modelo\SistemaOperativo.class
 controlador\Controlador.class
-vista\View$4.class
 modelo\BCP.class
 modelo\Estadisticas.class
 modelo\Disco.class
