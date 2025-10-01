@@ -417,6 +417,5 @@ public class SistemaOperativo {
     public Disco getDisco() {return disco;}
     public Planificador getPlanificador() {return plan;}
     public BCP getBCP() {return bcp;}
-    
-    
+    public Memoria getMemoria(){return memoria;}
 }

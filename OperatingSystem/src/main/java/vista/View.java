@@ -753,6 +753,10 @@ public class View extends javax.swing.JFrame {
     public void btnLimpiar(ActionListener al) {
         btnLimpiar.addActionListener(al);
     }
+    
+    public void btnReset(ActionListener al) {
+        this.btnLimpiar1.addActionListener(al);
+    }
     public void discoStageChange(ChangeListener listener){
         sptadisco.addChangeListener(listener);
     }
@@ -779,7 +783,7 @@ public class View extends javax.swing.JFrame {
     private javax.swing.JButton btnEstadistica;
     private javax.swing.JButton btnLimpiar;
     private javax.swing.JButton btnLimpiar1;
-    private javax.swing.JButton btnPaso;
+    public javax.swing.JButton btnPaso;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

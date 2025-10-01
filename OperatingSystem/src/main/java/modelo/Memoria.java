@@ -58,4 +58,8 @@ public class Memoria {
     public int size() {
         return memoria.length;
     }
+    
+    public void reset(){
+        memoria = new String[size()];
+    }
 }

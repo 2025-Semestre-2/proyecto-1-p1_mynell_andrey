@@ -37,6 +37,7 @@ public class Controlador {
         this.view.btnBuscarListener(e -> buscarArchivo());
         this.view.btnEjecutar(e -> ejecutarSO());
         this.view.btnLimpiar(e -> cleanAll());
+        this.view.btnReset(e -> clean());
         this.view.btnPasoListener(e -> ejecutarPasoPaso());
         try {
             this.view.setDiskSize(pc.getDisco().size());
@@ -68,8 +69,7 @@ public class Controlador {
         System.out.println("----");
         System.out.println(pc.getPlanificador().getColaListos());
         guardarEspacioSO(sizeMemoria);
-        planificadorTrabajos();
-        
+        planificadorTrabajos();   
     }
  
     public void guardarEspacioSO(int size){
@@ -122,11 +122,13 @@ public class Controlador {
                     String instr = pc.getDisco().getDisco(i);
                     if (instr != null) {
                         pc.getCPU().setIR(instr);
+                        this.view.jTable3.changeSelection(i, i, false, false);
                         String res = pc.interprete(instr);
                         switch(res){
                             case "": break;
                             case "~Exit": break;
                             case "~Input": 
+                                this.view.jTextField1.selectAll();
                                 CountDownLatch latch = new CountDownLatch(1);
                                 final String[] dato = new String[1];
                                 this.view.jTextField1.addActionListener(e ->{
@@ -245,7 +247,38 @@ public class Controlador {
             String instr = pc.getDisco().getDisco(posIntr);
             if (instr != null) {
                 pc.getCPU().setIR(instr);
-                pc.interprete(instr);
+                this.view.jTable3.changeSelection(posIntr, posIntr, false, false);
+                String res = pc.interprete(instr);
+                switch(res){
+                    case "": break;
+                    case "~Exit": break;
+                    case "~Input": 
+                        this.view.jTextField1.selectAll();
+                        new Thread(() -> {
+                            CountDownLatch latch = new CountDownLatch(1);
+                            final String[] dato = new String[1];
+                            this.view.jTextField1.addActionListener(e ->{
+                                dato[0] = this.view.jTextField1.getText();
+                                this.view.jTextField1.setText("");
+                                latch.countDown();
+                            });
+                            {
+                                try {
+                                    this.view.btnPaso.setEnabled(false);
+                                    latch.await();
+                                    this.pc.movRegistro("DX", Integer.parseInt(dato[0]));
+                                    this.view.btnPaso.setEnabled(true);
+                                } catch (InterruptedException ex) {
+                                    System.getLogger(Controlador.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                                }
+                            }
+                        }).start();
+                        break;
+
+                    default:
+                        view.jTextArea1.append(res+"\n");
+                        break;
+                }
                 procesoActual.setPc(posIntr + 1);
 
                 // actualizar UI de memoria y BCP en el hilo de Swing
@@ -390,14 +423,11 @@ public class Controlador {
         }
     }
 
-    public void cleanAll(){
+    public void clean(){
         view.getModelProgram().setRowCount(0);
         view.getModelMemory().setRowCount(0);
         view.getModelPila().setRowCount(0);
         view.getModelArchivos().setRowCount(0);
-        pc.getCPU().reset();
-        pc.ClearDisk();
-        contador =0;
         view.setlbIBX("---");
         view.setlbIR("---");
         view.setlblAC("---");
@@ -412,13 +442,27 @@ public class Controlador {
         view.setlbAlcance("---");
         view.setlblPrioridad("---");
         
-        view.getSpnMemoria().setValue(512);
-        view.getSpnDisco().setValue(512);
-        showDisk();
-        JOptionPane.showMessageDialog(null, "Sistema limpiado correctamente");
-        
+        int sizeMemoria = (Integer) view.getSpnMemoria().getValue();
+        int sizeDisco = (Integer) view.getSpnDisco().getValue();
+        try {
+            pc.tamannoDisco(sizeDisco);
+            pc.tamannoMemoria(sizeMemoria);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Error al inicializar el disco: " + e.getMessage());
+            return;
+        }
+        pc.inicializarSO(sizeMemoria);
+        pc.crearProcesos();
+        guardarEspacioSO(sizeMemoria);
+        inicializado = false;
+        procesoActual = null;
     }
     
+    public void cleanAll(){
+        pc.ClearDisk();
+        view.getSpnDisco().setValue(512);
+        clean();
+    }    
 
     private void mostrarEstadistica(){
        // view.dispose(); cierro ventana principal
