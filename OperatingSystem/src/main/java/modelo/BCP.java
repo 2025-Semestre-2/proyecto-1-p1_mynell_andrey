@@ -8,10 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-/**
- *
- * @author Andrey
- */
+
 public class BCP {
     private int idProceso;
     private String estado; //nuevo, preparado, ejecución, en espera, finalizado  
@@ -25,7 +22,7 @@ public class BCP {
     private String ir;
     
     private Stack<Integer> pila; //tamaño de 5
-    private BCP siguiente;
+    private String siguiente;
     private List<String> archivos;//lista de archivos que el proceso tiene abiertos
     
     private String cpuAsig;
@@ -42,6 +39,7 @@ public class BCP {
         this.prioridad = prioridad;
         this.base = base;
         this.alcance = alcance;
+        this.siguiente = siguiente;
         this.pila = new Stack<>();
         this.archivos = new ArrayList<>();
         this.tiempoInicio = System.currentTimeMillis();
@@ -51,6 +49,7 @@ public class BCP {
         this.estado = estado;
         this.prioridad = 1;
         this.base = 0;
+        this.siguiente = siguiente;
         this.alcance = 0;
         this.pila = new Stack<>();
         this.archivos = new ArrayList<>();
@@ -119,9 +118,14 @@ public class BCP {
         return pila;
     }
 
-    public BCP getSiguiente() {
+    public String getSiguiente() {
         return siguiente;
     }
+
+    public void setSiguiente(String siguiente) {
+        this.siguiente = siguiente;
+    }
+    
 
     public List<String> getArchivos() {
         return archivos;
@@ -191,9 +195,7 @@ public class BCP {
         this.pila = pila;
     }
 
-    public void setSiguiente(BCP siguiente) {
-        this.siguiente = siguiente;
-    }
+
 
     public void setArchivos(List<String> archivos) {
         this.archivos = archivos;

@@ -10,12 +10,11 @@ import modelo.Estadisticas;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-/**
- *
- * @author Andrey
- */
+
 public class Estadistica extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Estadistica.class.getName());
@@ -149,24 +148,47 @@ public class Estadistica extends javax.swing.JFrame {
         btnVolver.addActionListener(al);
     }
     public void mostrarGraficoBarras(List<Estadisticas.Registro> registros) {
-   
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
         for (Estadisticas.Registro reg : registros) {
             int proceso = reg.getIdProceso();
-        long tiempo = reg.getTiempo();
-            dataset.addValue(tiempo, "Proceso", "P" + proceso);
+            long tiempoMs = reg.getTiempo(); 
+            dataset.addValue(tiempoMs / 1000.0, "Proceso", "P" + proceso); 
+
         }
 
-       
         JFreeChart chart = ChartFactory.createBarChart(
                 "Tiempos de Ejecución por Proceso", 
                 "Procesos",
-                "Tiempo (ms)", 
+                "Tiempo (hh:mm:ss)", 
                 dataset
         );
 
-     
+        //esta seccion se agrega para cambiar el formato
+        //del eje y y que sea en hora:minutos:seg
+        CategoryPlot plot = chart.getCategoryPlot();
+        NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+        rangeAxis.setNumberFormatOverride(new java.text.NumberFormat() {
+            @Override
+            public StringBuffer format(double value, StringBuffer toAppendTo, java.text.FieldPosition pos) {
+                long segundos = (long) value;
+                long horas = segundos / 3600;
+                long minutos = (segundos % 3600) / 60;
+                long seg = segundos % 60;
+                return toAppendTo.append(String.format("%02d:%02d:%02d", horas, minutos, seg));
+            }
+
+            @Override
+            public StringBuffer format(long value, StringBuffer toAppendTo, java.text.FieldPosition pos) {
+                return format((double) value, toAppendTo, pos);
+            }
+
+            @Override
+            public Number parse(String source, java.text.ParsePosition parsePosition) {
+                return null; // no lo necesitas
+            }
+        });
+
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new java.awt.Dimension(jPanel2.getWidth(), jPanel2.getHeight()));
         jPanel2.removeAll();
