@@ -4,5 +4,5 @@
 ### [2021074920] Andrey Salamanca Campos
 ### [2022072412] Mynell Myers Hall
 
-### Estado del proyecto: 1
-### Enlace del video: (Si esto fue solicitado)
+### Estado del proyecto: 3
+### Enlace del video: https://youtu.be/uzqcqhGS99Q
