@@ -191,7 +191,7 @@ public class SistemaOperativo {
                 }
                 break;
             case "push":
-                plan.verSiguiente().getPila().push((Integer)getRegistro(partes[1]));
+                plan.verSiguiente().getPila().add((Integer)getRegistro(partes[1]));
                 break;
             case "pop":
                 int pop = plan.verSiguiente().getPila().pop();

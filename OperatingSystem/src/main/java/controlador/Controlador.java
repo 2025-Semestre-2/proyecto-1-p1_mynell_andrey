@@ -48,7 +48,6 @@ public class Controlador {
         this.estadistica.btnVolver(e -> volverEst());
         this.view.discoStageChange(e -> spinnerTamano());
         showDisk();
-
     }
     public void ejecutarSO(){
         int sizeMemoria = (Integer) view.getSpnMemoria().getValue();
@@ -69,7 +68,8 @@ public class Controlador {
         System.out.println("----");
         System.out.println(pc.getPlanificador().getColaListos());
         guardarEspacioSO(sizeMemoria);
-        planificadorTrabajos();   
+        planificadorTrabajos();
+        
     }
  
     public void guardarEspacioSO(int size){
@@ -442,26 +442,23 @@ public class Controlador {
         view.setlbAlcance("---");
         view.setlblPrioridad("---");
         
-        int sizeMemoria = (Integer) view.getSpnMemoria().getValue();
-        int sizeDisco = (Integer) view.getSpnDisco().getValue();
-        try {
-            pc.tamannoDisco(sizeDisco);
-            pc.tamannoMemoria(sizeMemoria);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Error al inicializar el disco: " + e.getMessage());
-            return;
-        }
-        pc.inicializarSO(sizeMemoria);
-        pc.crearProcesos();
-        guardarEspacioSO(sizeMemoria);
+        pc = new SistemaOperativo();
+        estadistica = new Estadistica();
+        est = new Estadisticas();
+        contador =0;
         inicializado = false;
         procesoActual = null;
+        pos = 0;
+        pc.tamannoMemoria(512);
+        
+        showDisk();
     }
     
     public void cleanAll(){
         pc.ClearDisk();
         view.getSpnDisco().setValue(512);
         clean();
+        JOptionPane.showMessageDialog(null, "Sistema limpiado correctamente");
     }    
 
     private void mostrarEstadistica(){
