@@ -11,6 +11,7 @@ import vista.Estadistica;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.CountDownLatch;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -124,7 +125,7 @@ public class Controlador {
                     if (instr != null) {
                         pc.getCPU().setIR(instr);
                         this.view.jTable3.changeSelection(i, i, false, false);
-                        String res = pc.interprete(instr);
+                        String res = pc.interprete(instr, proceso);
                         switch(res){
                             case "": break;
                             case "~Exit":
@@ -168,7 +169,7 @@ public class Controlador {
                         pc.guardarBCPMemoria(proceso, indice);
                         updateMemoria(proceso, indice);
                         actualizarBCP(proceso);
-
+                        agregarFila(pc.getPila());
                     }
                 }
                 if (stop) break;
@@ -254,7 +255,7 @@ public class Controlador {
             if (instr != null) {
                 pc.getCPU().setIR(instr);
                 this.view.jTable3.changeSelection(posIntr, posIntr, false, false);
-                String res = pc.interprete(instr);
+                String res = pc.interprete(instr, procesoActual);
                 switch(res){
                     case "": break;
                     case "~Exit": 
@@ -294,6 +295,7 @@ public class Controlador {
                 pc.guardarBCPMemoria(procesoActual, pos);
                 updateMemoria(procesoActual, pos);
                 actualizarBCP(procesoActual);
+                agregarFila(pc.getPila());
 
             }
             contador++;
@@ -474,7 +476,6 @@ public class Controlador {
     
     public void cleanAll(){
         pc.ClearDisk();
-        view.getSpnDisco().setValue(512);
         clean();
         JOptionPane.showMessageDialog(null, "Sistema limpiado correctamente");
     }    
@@ -490,5 +491,12 @@ public class Controlador {
         estadistica.setVisible(false);
     }
        
-
+    public void agregarFila(Stack<Integer>pila){
+        view.cleanPila();
+        int i=0;
+        for(Integer val :pila){
+            view.addFilaFila(i,Integer.toString(val));
+            i++;
+        }
+    }
 }

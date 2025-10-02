@@ -18,6 +18,7 @@ public class SistemaOperativo {
     private List<String> instrucciones;
     private Queue<BCP> colaProcesos; //FIFO
     private boolean cmpBandera = false;
+    private Stack<Integer> pila = new Stack<>();
     
   
     public SistemaOperativo(){
@@ -105,7 +106,7 @@ public class SistemaOperativo {
         return 0;
     }
 
-    public String interprete(String instr){
+    public String interprete(String instr, BCP proceso){
         String[] partes = instr.split(" ");
         String op = partes[0].toLowerCase();
         switch(op){
@@ -175,7 +176,7 @@ public class SistemaOperativo {
                 }
                 break;
             case "jmp":
-                int jmp = cpu.getPC()+ Integer.parseInt(partes[1]);
+                int jmp = proceso.getPc()+ Integer.parseInt(partes[1]);
                 cpu.setPC((jmp >= 0)? jmp:0);
                 break;
             case "cmp":
@@ -183,27 +184,27 @@ public class SistemaOperativo {
                 break;
             case "je":
                 if (cmpBandera){
-                    int je = cpu.getPC()+ Integer.parseInt(partes[1]);
+                    int je = proceso.getPc()+ Integer.parseInt(partes[1]);
                     cpu.setPC((je >= 0)? je:0);
                 }
                 break;
             case "jne":
                 if (!cmpBandera){
-                    int jne = cpu.getPC()+ Integer.parseInt(partes[1]);
+                    int jne = proceso.getPc()+ Integer.parseInt(partes[1]);
                     cpu.setPC((jne >= 0)? jne:0);
                 }
                 break;
             case "param":
                 for (int i= 1; i<partes.length;i++){
-                    plan.verSiguiente().getPila().push(Integer.parseInt(partes[i].replace(",","")));
+                    pila.push(Integer.parseInt(partes[i].replace(",","")));
                 }
                 break;
             case "push":
-                Stack u = plan.verSiguiente().getPila();
+                Stack u = pila;
                 u.push((Integer)getRegistro(partes[1]));
                 break;
             case "pop":
-                int pop = plan.verSiguiente().getPila().pop();
+                int pop = pila.pop();
                 switch(partes[1].toLowerCase()){
                 case "ax": cpu.setAX(pop); break;
                 case "bx": cpu.setBX(pop); break; 
@@ -436,4 +437,5 @@ public class SistemaOperativo {
     public Planificador getPlanificador() {return plan;}
     public BCP getBCP() {return bcp;}
     public Memoria getMemoria(){return memoria;}
+    public Stack getPila(){return pila;}
 }

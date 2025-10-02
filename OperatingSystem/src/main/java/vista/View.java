@@ -740,7 +740,20 @@ public class View extends javax.swing.JFrame {
         model.setValueAt(colum2,fila,1);
     }
    
-   
+    public void addFilaFila(int fila,String colum1){
+        DefaultTableModel model = (DefaultTableModel) jTable7.getModel();
+        if(model.getRowCount()<=fila){
+            model.addRow(new Object[]{colum1});
+        }
+        else{
+            model.setValueAt(colum1, fila, 0);
+        }
+    }
+    
+    public void cleanPila(){
+        ((DefaultTableModel) jTable7.getModel()).setRowCount(0);
+    }
+    
     public void btnBuscarListener(ActionListener al) {
         btnBuscar.addActionListener(al);
     }

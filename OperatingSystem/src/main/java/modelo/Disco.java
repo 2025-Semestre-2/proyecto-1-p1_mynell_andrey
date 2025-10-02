@@ -176,6 +176,7 @@ public class Disco {
     public void ClearAll(){
         try {
             escribirTodo(List.of());
+            inicializarArchivo();
         } catch (IOException ex) {
             System.getLogger(Disco.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
