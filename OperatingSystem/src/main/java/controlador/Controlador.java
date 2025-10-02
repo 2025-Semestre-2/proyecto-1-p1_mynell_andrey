@@ -97,6 +97,7 @@ public class Controlador {
         new Thread(() -> {   
             int cpu = 0;
             int indice = pc.getBCP().getPc();
+            int next=0;
             while (pc.getPlanificador().sizeCola() > 0) {
 
                 // tomar el proceso de la cola
@@ -107,6 +108,8 @@ public class Controlador {
                     cpu =1;
                 }
                 proceso.setCpuAsig("hilo"+cpu);
+                String enlace = getEnlace(next);
+                proceso.setSiguiente(enlace);
                 preparadoBCP(proceso, indice);//este para añadir el nuevo a los estados
                 // pasar a preparado
                 proceso.setEstado("preparado");
@@ -179,6 +182,7 @@ public class Controlador {
 
                 indice += 16;
                 cpu++;
+                next++;
 
             }
         }).start(); 
@@ -214,6 +218,7 @@ public class Controlador {
     }
     public void planificadorTrabajosPasoPaso() {
         int cpu=0;
+        int next=0;
         if(procesoActual==null){
             if(pc.getPlanificador().sizeCola() == 0){
                 JOptionPane.showMessageDialog(null, "Error: No hay procesos en cola");
@@ -228,6 +233,8 @@ public class Controlador {
                     cpu =1;
                 }
             procesoActual.setCpuAsig("hilo"+cpu);
+            String enlace = getEnlace(next);
+            procesoActual.setSiguiente(enlace);
             preparadoBCP(procesoActual, pos);//este para añadir el nuevo a los estados
             // pasar a preparado
             procesoActual.setEstado("preparado");
@@ -289,6 +296,7 @@ public class Controlador {
 
             }
             contador++;
+            next++;
             
         }
         else{
@@ -317,6 +325,16 @@ public class Controlador {
         updateMemoria(proceso,indice);
         updateEstados(Integer.toString(proceso.getIdProceso()),proceso.getEstado());
             
+    }
+    public String getEnlace(int n){
+        String enlace = "";
+        if(n < pc.getPlanificador().sizeCola() ) {
+            n++;
+            enlace = "p"+n;
+        }else{
+            enlace = "-";
+        }
+        return enlace;
     }
     public void preparadoBCP(BCP proceso,int indice){
         pc.guardarBCPMemoria(proceso,indice);
@@ -354,6 +372,7 @@ public class Controlador {
         view.addFilaMemoria(Integer.toString(posicion++),Integer.toString(bcp.getCx()));
         view.addFilaMemoria(Integer.toString(posicion++),Integer.toString(bcp.getDx()));
         view.addFilaMemoria(Integer.toString(posicion++),bcp.getIr());
+        view.addFilaMemoria(Integer.toString(posicion++),bcp.getSiguiente());
         view.addFilaMemoria(Integer.toString(posicion++),Long.toString(bcp.getTiempoInicio()));
         view.addFilaMemoria(Integer.toString(posicion++),Long.toString(bcp.getTiempoFin()));
         view.addFilaMemoria(Integer.toString(posicion++),Long.toString(bcp.getTiempoTotal()));
@@ -372,6 +391,7 @@ public class Controlador {
         view.updateFilaMemoria(posicion,Integer.toString(posicion++),Integer.toString(bcp.getCx()));
         view.updateFilaMemoria(posicion,Integer.toString(posicion++),Integer.toString(bcp.getDx()));
         view.updateFilaMemoria(posicion,Integer.toString(posicion++),bcp.getIr());
+        view.updateFilaMemoria(posicion,Integer.toString(posicion++),bcp.getSiguiente());
         view.updateFilaMemoria(posicion,Integer.toString(posicion++),Long.toString(bcp.getTiempoInicio()));
         view.updateFilaMemoria(posicion,Integer.toString(posicion++),Long.toString(bcp.getTiempoFin()));
         view.updateFilaMemoria(posicion,Integer.toString(posicion++),Long.toString(bcp.getTiempoTotal()));
@@ -389,7 +409,7 @@ public class Controlador {
         view.setlblDX(Integer.toString(bcp.getDx()));
         view.setlblPC(Integer.toString(bcp.getPc())); 
         
-       // view.setlbEnlace(bcp.getSiguiente());
+        view.setlbEnlace(bcp.getSiguiente());
         view.setlbCPU(bcp.getCpuAsig());
         view.setlbBase(Integer.toString(bcp.getBase()));
         view.setlbAlcance(Integer.toString(bcp.getAlcance()));
