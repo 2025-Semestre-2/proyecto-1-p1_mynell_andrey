@@ -1,7 +1,4 @@
-Prueba.asm|50|7
-test.asm|57|2
-test2.asm|59|2
-test1.asm|61|3
+test4.asm|50|20
 
 
 
@@ -48,24 +45,27 @@ test1.asm|61|3
 
 
 
-MOV AX, 5
-MOV BX, 3
-LOAD AX
-ADD BX
-SUB AX
-STORE AX
-MOV BX, -8
-INT 09H
-INT 10H
-MOV DX, 20
-INT 10H
-PUSH AX
-POP DX
-INT 10H
 
 
 
-
+mov bx, 5
+mov ax, 3
+add bx
+sub ax
+inc
+inc ax
+dec
+dec bx
+swap ax, bx
+cmp ax, bx
+int 10h
+jmp 1
+jmp -1
+int 09h
+store dx
+load cx
+mov dx, cx
+int 10h
 
 
 

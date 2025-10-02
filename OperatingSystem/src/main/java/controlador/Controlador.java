@@ -65,8 +65,6 @@ public class Controlador {
         
         //guardarEnDisco();
         pc.crearProcesos();
-        System.out.println("----");
-        System.out.println(pc.getPlanificador().getColaListos());
         guardarEspacioSO(sizeMemoria);
         planificadorTrabajos();
         
@@ -116,7 +114,7 @@ public class Controlador {
                 proceso.setEstado("ejecucion");
                 proceso.setTiempoInicio(System.currentTimeMillis());
                 updateBCP(proceso, indice);
-
+                boolean stop = false;
                 // ejecutar instrucciones
                 for (int i = proceso.getBase(); i < proceso.getBase() + proceso.getAlcance(); i++) {
                     String instr = pc.getDisco().getDisco(i);
@@ -126,7 +124,9 @@ public class Controlador {
                         String res = pc.interprete(instr);
                         switch(res){
                             case "": break;
-                            case "~Exit": break;
+                            case "~Exit":
+                                stop = true;
+                                break;
                             case "~Input": 
                                 this.view.jTextField1.selectAll();
                                 CountDownLatch latch = new CountDownLatch(1);
@@ -150,6 +150,7 @@ public class Controlador {
                                 view.jTextArea1.append(res+"\n");
                                 break;
                         }
+                        if (stop) break;
                         proceso.setPc(i + 1);
 
                         int tiempoInstr = pc.getTimer(instr);
@@ -167,7 +168,7 @@ public class Controlador {
 
                     }
                 }
-
+                if (stop) break;
                 // finalizar proceso
                 proceso.setEstado("finalizado");
                 proceso.setTiempoFin(System.currentTimeMillis());
@@ -201,8 +202,6 @@ public class Controlador {
 
             //guardarEnDisco();
             pc.crearProcesos();
-            System.out.println("----");
-            System.out.println(pc.getPlanificador().getColaListos());
             guardarEspacioSO(sizeMemoria);
             inicializado=true;
             pos =pc.getBCP().getPc();
@@ -251,7 +250,9 @@ public class Controlador {
                 String res = pc.interprete(instr);
                 switch(res){
                     case "": break;
-                    case "~Exit": break;
+                    case "~Exit": 
+                        
+                        break;
                     case "~Input": 
                         this.view.jTextField1.selectAll();
                         new Thread(() -> {
@@ -293,7 +294,6 @@ public class Controlador {
         }
         else{
             // finalizar proceso
-            System.out.println(pos);
           
             procesoActual.setEstado("finalizado");
             procesoActual.setTiempoFin(System.currentTimeMillis());
@@ -404,8 +404,6 @@ public class Controlador {
                     List<String> lista = leerArchivo(archivo);
                     pc.guardarInstrucciones(archivo.getName(),lista);
                     pc.getIntr();
-                    JOptionPane.showMessageDialog(null,"Archivo leido correctamente");
-
                 } catch(HeadlessException | IOException e){
                     JOptionPane.showMessageDialog(null, "No existe espacio suficiente en disco para cargar");
                 }
@@ -466,7 +464,6 @@ public class Controlador {
        
         estadistica.setVisible(true);
         estadistica.mostrarGraficoBarras(est.getRegistros());
-        System.out.println(est.toString());
     }
 
     private void volverEst(){

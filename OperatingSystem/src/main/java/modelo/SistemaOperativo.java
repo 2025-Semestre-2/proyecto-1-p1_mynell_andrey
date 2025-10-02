@@ -106,7 +106,6 @@ public class SistemaOperativo {
     }
 
     public String interprete(String instr){
-        System.out.println(instr);
         String[] partes = instr.split(" ");
         String op = partes[0].toLowerCase();
         switch(op){
@@ -117,7 +116,16 @@ public class SistemaOperativo {
                 movRegistro(partes[1],cpu.getAC());
                 break;
             case "mov":
-                movRegistro(partes[1],Integer.parseInt(partes[2]));
+                switch (partes[2].toLowerCase()){
+                    case "ax":
+                    case "bx":
+                    case "cx":
+                    case "dx":
+                        movRegistro(partes[1],getRegistro(partes[2]));
+                        break;
+                    default:
+                        movRegistro(partes[1],Integer.parseInt(partes[2]));
+                }
                 break;
             case "sub":
                 cpu.setAC(cpu.getAC()-getRegistro(partes[1]));
@@ -191,7 +199,8 @@ public class SistemaOperativo {
                 }
                 break;
             case "push":
-                plan.verSiguiente().getPila().add((Integer)getRegistro(partes[1]));
+                Stack u = plan.verSiguiente().getPila();
+                u.push((Integer)getRegistro(partes[1]));
                 break;
             case "pop":
                 int pop = plan.verSiguiente().getPila().pop();
@@ -226,7 +235,8 @@ public class SistemaOperativo {
     public int getTimer(String instr){
         String[] partes = instr.split(" ");
         String op = partes[0].toLowerCase();
-        String val = partes[1].toLowerCase();
+        String val = "0";
+        if (partes.length >1) {val = partes[1].toLowerCase();}
         int time =0;
         switch(op){
             case "load":
@@ -309,24 +319,32 @@ public class SistemaOperativo {
             int val = Integer.parseInt(partes[1].toLowerCase().replace("h", ""));
             String valBin = String.format("%08d", Integer.parseInt(Integer.toBinaryString(val & 0xFF)));
             str += " " + valBin;
+        }else if ("param".equals(op)){
+            for(int i = 1; i < partes.length; i++){
+                int val = Integer.parseInt(partes[1].toLowerCase().replace(",", ""));
+                String valBin = String.format("%08d", Integer.parseInt(Integer.toBinaryString(val & 0xFF)));
+                str += " " + valBin;
+            }
         }else{
-            String reg = partes[1].replace(",", "").toLowerCase();
-            switch(reg){
-                case "ax": str += " 0001"; break;
-                case "bx": str += " 0010"; break; 
-                case "cx": str += " 0011"; break;
-                case "dx": str += " 0100";break; 
-                }
-            if(instr.contains(",")){
-                switch(partes[2].toLowerCase()){
+            if (partes.length >1){
+                String reg = partes[1].replace(",", "").toLowerCase();
+                switch(reg){
                     case "ax": str += " 0001"; break;
-                    case "bx": str += " 0010";  break; 
+                    case "bx": str += " 0010"; break; 
                     case "cx": str += " 0011"; break;
-                    case "dx": str += " 0100";break;
-                    default:
-                        int val = Integer.parseInt(partes[2]);
-                        String valBin = String.format("%08d", Integer.parseInt(Integer.toBinaryString(val & 0xFF)));
-                        str += " " + valBin;
+                    case "dx": str += " 0100";break; 
+                    }
+                if(instr.contains(",")){
+                    switch(partes[2].toLowerCase()){
+                        case "ax": str += " 0001"; break;
+                        case "bx": str += " 0010";  break; 
+                        case "cx": str += " 0011"; break;
+                        case "dx": str += " 0100";break;
+                        default:
+                            int val = Integer.parseInt(partes[2]);
+                            String valBin = String.format("%08d", Integer.parseInt(Integer.toBinaryString(val & 0xFF)));
+                            str += " " + valBin;
+                    }
                 }
             }
         }
